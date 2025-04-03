@@ -90,12 +90,15 @@ for PKG in $CHANGED; do
       LATEST_VERSION=$(npm view "$DEP" version)
 
       if [[ -n "$LATEST_VERSION" ]]; then
+        echo "Replacing workspace:^ with actual version $LATEST_VERSION for $DEP in $PKG_DIR/package.json"
         jq --arg dep "$DEP" --arg version "$LATEST_VERSION" \
           '(.dependencies[$dep] = $version)' "$PKG_DIR/package.json" > temp.json && mv temp.json "$PKG_DIR/package.json"
       fi
     done
   fi
 done
+
+echo "Updated package.json files to resolve workspace dependencies."
 
 if [[ -z "$CHANGED" ]]; then
   echo "No packages changed. Skipping publish."
