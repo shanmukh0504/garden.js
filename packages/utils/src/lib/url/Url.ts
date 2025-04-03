@@ -36,3 +36,11 @@ export class Url extends URL {
   }
 }
 
+export const isUrl = (url: string) => {
+  try {
+    new URL(url);
+    return true;
+  } catch (e) {
+    return false;
+  }
+};

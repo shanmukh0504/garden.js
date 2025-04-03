@@ -216,6 +216,7 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
           -c user.name="$COMMIT_NAME" \
           commit -m "V$NEW_VERSION"
 
+      # Replace `yarn run publish` with `yarn publish`
       yarn publish --new-version "$NEW_VERSION" --access public --non-interactive
 
       git tag "$PACKAGE_NAME@$NEW_VERSION"
