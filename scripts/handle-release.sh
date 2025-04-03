@@ -181,20 +181,32 @@ export -f increment_version
 
 yarn workspaces foreach --all --topological --no-private run build
 
+# Function to replace workspace dependencies with actual versions
 replace_workspace_versions() {
   for DIR in packages/*; do
     if [[ -f "$DIR/package.json" ]]; then
       PACKAGE_JSON="$DIR/package.json"
       NAME=$(jq -r .name "$PACKAGE_JSON")
+      
+      # Check if the directory name corresponds to the package name (in case of mismatch)
+      DIR_NAME=$(basename "$DIR")
+      
       if [[ "$NAME" != "null" && -n "$NAME" ]]; then
         DEPENDENCIES=$(jq -r '.dependencies // {}' "$PACKAGE_JSON" | jq -r 'keys[]')
+        
         for DEP in $DEPENDENCIES; do
           VERSION=$(jq -r ".dependencies[\"$DEP\"]" "$PACKAGE_JSON")
+          
           if [[ "$VERSION" == workspace:* ]]; then
-            # Get the version of the local workspace dependency
-            LOCAL_VERSION=$(jq -r ".version" "packages/$(basename "$DEP")/package.json")
-            echo "Replacing $DEP with version $LOCAL_VERSION in $PACKAGE_JSON"
-            jq --arg DEP "$DEP" --arg VERSION "$LOCAL_VERSION" '.dependencies[$DEP] = $VERSION' "$PACKAGE_JSON" > temp.json && mv temp.json "$PACKAGE_JSON"
+            if [[ "$DEP" == "@shanmukh0504/wallet-connectors" && "$DIR_NAME" == "walletConnectors" ]]; then
+              LOCAL_VERSION=$(jq -r ".version" "packages/walletConnectors/package.json")
+              echo "Replacing $DEP with version $LOCAL_VERSION in $PACKAGE_JSON"
+              jq --arg DEP "$DEP" --arg VERSION "$LOCAL_VERSION" '.dependencies[$DEP] = $VERSION' "$PACKAGE_JSON" > temp.json && mv temp.json "$PACKAGE_JSON"
+            else
+              LOCAL_VERSION=$(jq -r ".version" "packages/$(basename "$DEP")/package.json")
+              echo "Replacing $DEP with version $LOCAL_VERSION in $PACKAGE_JSON"
+              jq --arg DEP "$DEP" --arg VERSION "$LOCAL_VERSION" '.dependencies[$DEP] = $VERSION' "$PACKAGE_JSON" > temp.json && mv temp.json "$PACKAGE_JSON"
+            fi
           fi
         done
       fi
@@ -202,7 +214,6 @@ replace_workspace_versions() {
   done
 }
 
-# Replace workspace versions before publishing
 replace_workspace_versions
 
 # Function to update version in package.json
