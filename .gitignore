@@ -1,0 +1,9 @@
+.env
+node_modules
+packages/*/dist/**/*
+.yarn
+.DS_Store
+
+**/*/tsconfig.tsbuildinfo
+
+packages/react-hooks/test/node_modules
