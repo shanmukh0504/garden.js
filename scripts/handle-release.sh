@@ -208,14 +208,16 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
   jq --arg new_version "$NEW_VERSION" '.version = $new_version' package.json > package.tmp.json && mv package.tmp.json package.json
 
   if [[ "$VERSION_BUMP" == "prerelease" ]]; then
-    npm publish --tag beta --access public
+    yarn publish --new-version "$NEW_VERSION" --tag beta --access public --non-interactive
   else
     if [[ "$IS_PR" != "true" ]]; then
       git add package.json
       git -c user.email="$COMMIT_EMAIL" \
           -c user.name="$COMMIT_NAME" \
           commit -m "V$NEW_VERSION"
-      npm publish --access public
+
+      yarn publish --new-version "$NEW_VERSION" --access public --non-interactive
+
       git tag "$PACKAGE_NAME@$NEW_VERSION"
       git push https://x-access-token:${GH_PAT}@github.com/shanmukh0504/garden.js.git HEAD:main --tags
     else
