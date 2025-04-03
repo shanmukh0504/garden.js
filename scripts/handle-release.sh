@@ -181,6 +181,37 @@ export -f increment_version
 
 yarn workspaces foreach --all --topological --no-private run build
 
+replace_workspace_versions() {
+  for DIR in packages/*; do
+    if [[ -f "$DIR/package.json" ]]; then
+      PACKAGE_JSON="$DIR/package.json"
+      NAME=$(jq -r .name "$PACKAGE_JSON")
+      if [[ "$NAME" != "null" && -n "$NAME" ]]; then
+        DEPENDENCIES=$(jq -r '.dependencies // {}' "$PACKAGE_JSON" | jq -r 'keys[]')
+        for DEP in $DEPENDENCIES; do
+          VERSION=$(jq -r ".dependencies[\"$DEP\"]" "$PACKAGE_JSON")
+          if [[ "$VERSION" == workspace:* ]]; then
+            # Get the version of the local workspace dependency
+            LOCAL_VERSION=$(jq -r ".version" "packages/$(basename "$DEP")/package.json")
+            echo "Replacing $DEP with version $LOCAL_VERSION in $PACKAGE_JSON"
+            jq --arg DEP "$DEP" --arg VERSION "$LOCAL_VERSION" '.dependencies[$DEP] = $VERSION' "$PACKAGE_JSON" > temp.json && mv temp.json "$PACKAGE_JSON"
+          fi
+        done
+      fi
+    fi
+  done
+}
+
+# Replace workspace versions before publishing
+replace_workspace_versions
+
+# Function to update version in package.json
+update_version() {
+  NEW_VERSION=$1
+  jq --arg new_version "$NEW_VERSION" '.version = $new_version' package.json > temp.json && mv temp.json package.json
+}
+
+# Version bump logic
 for PKG in "${PUBLISH_ORDER[@]}"; do
   echo ""
   echo "📦 Processing $PKG..."
@@ -205,29 +236,16 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
   fi
 
   echo "Bumping $PACKAGE_NAME to $NEW_VERSION"
-  jq --arg new_version "$NEW_VERSION" '.version = $new_version' package.json > package.tmp.json && mv package.tmp.json package.json
+  update_version "$NEW_VERSION"  # Update the version in package.json
 
-  if [[ "$VERSION_BUMP" == "prerelease" ]]; then
-    yarn publish --new-version "$NEW_VERSION" --tag beta --access public --non-interactive
-  else
-    if [[ "$IS_PR" != "true" ]]; then
-      git add package.json
-      git -c user.email="$COMMIT_EMAIL" \
-          -c user.name="$COMMIT_NAME" \
-          commit -m "V$NEW_VERSION"
-
-      # Replace `yarn run publish` with `yarn publish`
-      yarn publish --new-version "$NEW_VERSION" --access public --non-interactive
-
-      git tag "$PACKAGE_NAME@$NEW_VERSION"
-      git push https://x-access-token:${GH_PAT}@github.com/shanmukh0504/garden.js.git HEAD:main --tags
-    else
-      echo "Skipping commit for PR."
-    fi
-  fi
+  # Publish the package
+  yarn publish --new-version "$NEW_VERSION" --access public --non-interactive
+  git tag "$PACKAGE_NAME@$NEW_VERSION"
+  git push https://x-access-token:${GH_PAT}@github.com/shanmukh0504/garden.js.git HEAD:main --tags
 
   cd - > /dev/null
 done
+
 
 yarn config unset yarnPath
 jq 'del(.packageManager)' package.json > temp.json && mv temp.json package.json
