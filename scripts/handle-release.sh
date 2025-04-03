@@ -80,6 +80,23 @@ fi
 echo "Changed packages:"
 echo "$CHANGED"
 
+for PKG in $CHANGED; do
+  PKG_DIR="packages/$PKG"
+  
+  if [[ -f "$PKG_DIR/package.json" ]]; then
+    DEPENDENCIES=$(jq -r '.dependencies | to_entries[] | select(.value == "workspace:^") | .key' "$PKG_DIR/package.json")
+    
+    for DEP in $DEPENDENCIES; do
+      LATEST_VERSION=$(npm view "$DEP" version)
+
+      if [[ -n "$LATEST_VERSION" ]]; then
+        jq --arg dep "$DEP" --arg version "$LATEST_VERSION" \
+          '(.dependencies[$dep] = $version)' "$PKG_DIR/package.json" > temp.json && mv temp.json "$PKG_DIR/package.json"
+      fi
+    done
+  fi
+done
+
 if [[ -z "$CHANGED" ]]; then
   echo "No packages changed. Skipping publish."
   exit 0
@@ -181,48 +198,6 @@ export -f increment_version
 
 yarn workspaces foreach --all --topological --no-private run build
 
-# Function to replace workspace dependencies with actual versions
-replace_workspace_versions() {
-  for DIR in packages/*; do
-    if [[ -f "$DIR/package.json" ]]; then
-      PACKAGE_JSON="$DIR/package.json"
-      NAME=$(jq -r .name "$PACKAGE_JSON")
-      
-      # Check if the directory name corresponds to the package name (in case of mismatch)
-      DIR_NAME=$(basename "$DIR")
-      
-      if [[ "$NAME" != "null" && -n "$NAME" ]]; then
-        DEPENDENCIES=$(jq -r '.dependencies // {}' "$PACKAGE_JSON" | jq -r 'keys[]')
-        
-        for DEP in $DEPENDENCIES; do
-          VERSION=$(jq -r ".dependencies[\"$DEP\"]" "$PACKAGE_JSON")
-          
-          if [[ "$VERSION" == workspace:* ]]; then
-            if [[ "$DEP" == "@shanmukh0504/wallet-connectors" && "$DIR_NAME" == "walletConnectors" ]]; then
-              LOCAL_VERSION=$(jq -r ".version" "packages/walletConnectors/package.json")
-              echo "Replacing $DEP with version $LOCAL_VERSION in $PACKAGE_JSON"
-              jq --arg DEP "$DEP" --arg VERSION "$LOCAL_VERSION" '.dependencies[$DEP] = $VERSION' "$PACKAGE_JSON" > temp.json && mv temp.json "$PACKAGE_JSON"
-            else
-              LOCAL_VERSION=$(jq -r ".version" "packages/$(basename "$DEP")/package.json")
-              echo "Replacing $DEP with version $LOCAL_VERSION in $PACKAGE_JSON"
-              jq --arg DEP "$DEP" --arg VERSION "$LOCAL_VERSION" '.dependencies[$DEP] = $VERSION' "$PACKAGE_JSON" > temp.json && mv temp.json "$PACKAGE_JSON"
-            fi
-          fi
-        done
-      fi
-    fi
-  done
-}
-
-replace_workspace_versions
-
-# Function to update version in package.json
-update_version() {
-  NEW_VERSION=$1
-  jq --arg new_version "$NEW_VERSION" '.version = $new_version' package.json > temp.json && mv temp.json package.json
-}
-
-# Version bump logic
 for PKG in "${PUBLISH_ORDER[@]}"; do
   echo ""
   echo "📦 Processing $PKG..."
@@ -247,16 +222,26 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
   fi
 
   echo "Bumping $PACKAGE_NAME to $NEW_VERSION"
-  update_version "$NEW_VERSION"  # Update the version in package.json
+  jq --arg new_version "$NEW_VERSION" '.version = $new_version' package.json > package.tmp.json && mv package.tmp.json package.json
 
-  # Publish the package
-  yarn publish --new-version "$NEW_VERSION" --access public --non-interactive
-  git tag "$PACKAGE_NAME@$NEW_VERSION"
-  git push https://x-access-token:${GH_PAT}@github.com/shanmukh0504/garden.js.git HEAD:main --tags
+  if [[ "$VERSION_BUMP" == "prerelease" ]]; then
+    npm publish --tag beta --access public
+  else
+    if [[ "$IS_PR" != "true" ]]; then
+      git add package.json
+      git -c user.email="$COMMIT_EMAIL" \
+          -c user.name="$COMMIT_NAME" \
+          commit -m "V$NEW_VERSION"
+      npm publish --access public
+      git tag "$PACKAGE_NAME@$NEW_VERSION"
+      git push https://x-access-token:${GH_PAT}@github.com/shanmukh0504/garden.js.git HEAD:main --tags
+    else
+      echo "Skipping commit for PR."
+    fi
+  fi
 
   cd - > /dev/null
 done
-
 
 yarn config unset yarnPath
 jq 'del(.packageManager)' package.json > temp.json && mv temp.json package.json
