@@ -1,5 +1,5 @@
 import { Garden } from './garden';
-import { Environment, Siwe, Url, with0x } from '@gardenfi/utils';
+import { Environment, Siwe, Url, with0x } from '@shanmukh0504/utils';
 import {
   createWalletClient,
   http,
@@ -15,7 +15,7 @@ import {
   SupportedAssets,
 
   // SupportedAssets,
-} from '@gardenfi/orderbook';
+} from '@shanmukh0504/orderbook';
 import { sleep } from '@catalogfi/utils';
 import {
   arbitrumSepolia,
@@ -28,7 +28,7 @@ import { DigestKey } from './digestKey/digestKey';
 // import { DigestKey } from './digestKey/digestKey';
 // import { BitcoinNetwork, BitcoinProvider } from '@catalogfi/wallets';
 // import { Quote } from './../quote/quote';
-// import { Orderbook } from 'gardenfi/orderbook';
+// import { Orderbook } from 'shanmukh0504/orderbook';
 
 describe('swap and execute using garden', () => {
   // const bitcoinAddress = 'tb1qxtztdl8qn24axe7dnvp75xgcns6pl5ka9tzjru';

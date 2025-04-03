@@ -6,9 +6,9 @@ import { createConfig, http, WagmiProvider } from 'wagmi';
 import { arbitrum, mainnet } from 'wagmi/chains';
 import { injected, metaMask, safe } from 'wagmi/connectors';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ArbitrumLocalnet, EthereumLocalnet } from '@gardenfi/orderbook';
-import { BTCWalletProvider } from '@gardenfi/wallet-connectors';
-import { Network } from '@gardenfi/utils';
+import { ArbitrumLocalnet, EthereumLocalnet } from '@shanmukh0504/orderbook';
+import { BTCWalletProvider } from '@shanmukh0504/wallet-connectors';
+import { Network } from '@shanmukh0504/utils';
 
 export const SupportedChains = [
   mainnet,

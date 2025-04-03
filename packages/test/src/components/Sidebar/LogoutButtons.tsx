@@ -1,7 +1,7 @@
 import { Button } from '../common/Button'
 import { useAccount } from 'wagmi';
 import { useDisconnect } from 'wagmi';
-import { useBitcoinWallet } from '@gardenfi/wallet-connectors';
+import { useBitcoinWallet } from '@shanmukh0504/wallet-connectors';
 
 export const LogoutButtons = () => {
     const { address: EvmAddress } = useAccount();

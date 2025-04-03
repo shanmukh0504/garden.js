@@ -3,7 +3,7 @@ import {
   IGardenJS,
   OrderWithStatus,
   ParseOrderStatus,
-} from '@gardenfi/core';
+} from '@shanmukh0504/core';
 import { useEffect, useState } from 'react';
 import { Address } from 'viem';
 

@@ -9,9 +9,9 @@ import {
   num,
   shortString,
 } from 'starknet';
-import { MatchedOrder } from '@gardenfi/orderbook';
+import { MatchedOrder } from '@shanmukh0504/orderbook';
 import { AsyncResult, Err, Ok, Fetcher } from '@catalogfi/utils';
-import { APIResponse, Url, hexToU32Array } from '@gardenfi/utils';
+import { APIResponse, Url, hexToU32Array } from '@shanmukh0504/utils';
 import { IStarknetHTLC } from '../starknetHTLC.types';
 import { starknetHtlcABI } from '../abi/starknetHtlcABI';
 

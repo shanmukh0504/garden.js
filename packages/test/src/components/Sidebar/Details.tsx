@@ -1,5 +1,5 @@
 import { useAccount, useChainId, useChains } from 'wagmi';
-import { useBitcoinWallet } from '@gardenfi/wallet-connectors';
+import { useBitcoinWallet } from '@shanmukh0504/wallet-connectors';
 import { useEffect, useState } from 'react';
 
 export const Details = () => {

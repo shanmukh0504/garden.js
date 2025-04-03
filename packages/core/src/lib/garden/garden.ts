@@ -20,7 +20,7 @@ import {
   isMainnet,
   MatchedOrder,
   Orderbook,
-} from '@gardenfi/orderbook';
+} from '@shanmukh0504/orderbook';
 import {
   APIResponse,
   Environment,
@@ -29,7 +29,7 @@ import {
   Siwe,
   sleep,
   Url,
-} from '@gardenfi/utils';
+} from '@shanmukh0504/utils';
 import { IQuote } from '../quote/quote.types';
 import { getBitcoinNetwork, isValidBitcoinPubKey, toXOnly } from '../utils';
 import {
@@ -93,8 +93,8 @@ export class Garden extends EventBroker<GardenEvents> implements IGardenJS {
       config.environment === Environment.MAINNET
         ? API.mainnet
         : config.environment === Environment.TESTNET
-        ? API.testnet
-        : API.localnet;
+          ? API.testnet
+          : API.localnet;
     if (!api)
       throw new Error(
         'API not found, invalid environment ' + config.environment,
@@ -131,8 +131,8 @@ export class Garden extends EventBroker<GardenEvents> implements IGardenJS {
       config.environment === Environment.MAINNET
         ? API.mainnet
         : config.environment === Environment.TESTNET
-        ? API.testnet
-        : undefined;
+          ? API.testnet
+          : undefined;
     if (!api)
       throw new Error(
         'API not found, invalid environment ' + config.environment,
@@ -367,7 +367,7 @@ export class Garden extends EventBroker<GardenEvents> implements IGardenJS {
       } else if (
         orderRes.val &&
         orderRes.val.create_order.create_id.toLowerCase() ===
-          createOrderID.toLowerCase()
+        createOrderID.toLowerCase()
       ) {
         return Ok(orderRes.val);
       }

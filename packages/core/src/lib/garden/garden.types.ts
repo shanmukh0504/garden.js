@@ -1,7 +1,7 @@
 import { AsyncResult } from '@catalogfi/utils';
-import { Asset, IOrderbook, MatchedOrder } from '@gardenfi/orderbook';
+import { Asset, IOrderbook, MatchedOrder } from '@shanmukh0504/orderbook';
 import { OrderStatus } from '../orderStatus/status';
-import { Environment, EventBroker, IAuth } from '@gardenfi/utils';
+import { Environment, EventBroker, IAuth } from '@shanmukh0504/utils';
 import { ISecretManager } from '../secretManager/secretManager.types';
 import { IQuote } from '../quote/quote.types';
 import { IBlockNumberFetcher } from '../blockNumberFetcher/blockNumber';

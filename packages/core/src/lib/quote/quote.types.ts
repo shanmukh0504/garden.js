@@ -3,8 +3,8 @@ import {
   Chain,
   CreateOrderRequestWithAdditionalData,
   CreateOrderReqWithStrategyId,
-} from '@gardenfi/orderbook';
-import { APIResponse } from '@gardenfi/utils';
+} from '@shanmukh0504/orderbook';
+import { APIResponse } from '@shanmukh0504/utils';
 
 export interface IQuote {
   /**

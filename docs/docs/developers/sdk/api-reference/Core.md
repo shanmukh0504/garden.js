@@ -147,7 +147,7 @@ The `status` of an order is 3 digit number where:
 - the second digit indicates the order status of the initiator atomic swap, found in `Order.initiatorAtomicSwap.swapStatus`
 - the third digit indicates the order status of the follower (redeemer) atomic swap, found in `Order.followerAtomicSwap.swapStatus`.
 
-The `parseStatus` function in `@gardenfi/orderbook` provides you the `status` of an order based on an `Order`. Following are the relevant statuses that you must know to perform the relevant actions:
+The `parseStatus` function in `@shanmukh0504/orderbook` provides you the `status` of an order based on an `Order`. Following are the relevant statuses that you must know to perform the relevant actions:
 
 - `200`: Order filled, initiator can initiate.
 - `220`: The initiator has initiated it, and the follower can initiate it.

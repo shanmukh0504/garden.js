@@ -1,4 +1,4 @@
-import { useGarden } from '@gardenfi/react-hooks';
+import { useGarden } from '@shanmukh0504/react-hooks';
 import { useState } from 'react';
 import { useAccount } from 'wagmi';
 import { Button } from '../common/Button';
@@ -89,11 +89,10 @@ export const SwapComponent = () => {
           />
         </div>
         <div
-          className={`flex flex-col gap-2 rounded-md ${
-            loading
+          className={`flex flex-col gap-2 rounded-md ${loading
               ? 'pointer-events-none text-[#E36492]'
               : 'pointer-events-auto'
-          }`}
+            }`}
         >
           <Button
             className="text-center items-center justify-center font-medium text-lg bg-opacity-80 hover:bg-opacity-100 bg-[#E36492]"

@@ -1,4 +1,4 @@
-import { Chains } from "@gardenfi/orderbook";
+import { Chains } from "@shanmukh0504/orderbook";
 
 export const SupportedChains = () => {
     return (

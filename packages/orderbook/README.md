@@ -1,11 +1,11 @@
-## @gardenfi/orderbook
+## @shanmukh0504/orderbook
 
-The `@gardenfi/orderbook` package is used to facilitate the creation of orders. It also provides functionality for listening to orders and retrieving orders created by a specific address.
+The `@shanmukh0504/orderbook` package is used to facilitate the creation of orders. It also provides functionality for listening to orders and retrieving orders created by a specific address.
 
 ### Installation
 
 ```
-npm install @gardenfi/orderbook
+npm install @shanmukh0504/orderbook
 ```
 
 ### Usage

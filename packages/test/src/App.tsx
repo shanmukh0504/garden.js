@@ -1,5 +1,5 @@
-import { GardenProvider } from '@gardenfi/react-hooks';
-import { Environment } from '@gardenfi/utils';
+import { GardenProvider } from '@shanmukh0504/react-hooks';
+import { Environment } from '@shanmukh0504/utils';
 import { useWalletClient } from 'wagmi';
 import { Swap } from './components/Swap';
 

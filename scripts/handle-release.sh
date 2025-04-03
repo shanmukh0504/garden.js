@@ -107,7 +107,7 @@ for PKG in $TOPO_ORDER; do
     continue
   fi
 
-  DEPS=$(jq -r '.dependencies // {} | keys[]' "packages/$PKG_DIR/package.json" 2>/dev/null | grep '^@gardenfi/' || true)
+  DEPS=$(jq -r '.dependencies // {} | keys[]' "packages/$PKG_DIR/package.json" 2>/dev/null | grep '^@shanmukh0504/' || true)
   for DEP in $DEPS; do
     if [[ -n "${REVERSE_DEP_MAP[$DEP]}" ]]; then
       REVERSE_DEP_MAP[$DEP]="${REVERSE_DEP_MAP[$DEP]} $PKG"
@@ -217,7 +217,7 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
           commit -m "V$NEW_VERSION"
       npm publish --access public
       git tag "$PACKAGE_NAME@$NEW_VERSION"
-      git push https://x-access-token:${GH_PAT}@github.com/catalogfi/garden.js.git HEAD:main --tags
+      git push https://x-access-token:${GH_PAT}@github.com/shanmukh0504/garden.js.git HEAD:main --tags
     else
       echo "Skipping commit for PR."
     fi
@@ -234,7 +234,7 @@ if [[ "$IS_PR" != "true" && -n $(git status --porcelain) ]]; then
   git -c user.email="$COMMIT_EMAIL" \
       -c user.name="$COMMIT_NAME" \
       commit -m "commit release script and config changes"
-  git push https://x-access-token:${GH_PAT}@github.com/catalogfi/garden.js.git HEAD:main
+  git push https://x-access-token:${GH_PAT}@github.com/shanmukh0504/garden.js.git HEAD:main
 fi
 
 rm -f ~/.npmrc

@@ -1,5 +1,5 @@
 {
-  "name": "@gardenfi/test",
+  "name": "@shanmukh0504/test",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -12,11 +12,11 @@
   "dependencies": {
     "@catalogfi/wallets": "^0.2.54",
     "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
-    "@gardenfi/core": "workspace:^",
-    "@gardenfi/orderbook": "workspace:^",
-    "@gardenfi/react-hooks": "workspace:^",
-    "@gardenfi/utils": "workspace:^",
-    "@gardenfi/wallet-connectors": "workspace:^",
+    "@shanmukh0504/core": "workspace:^",
+    "@shanmukh0504/orderbook": "workspace:^",
+    "@shanmukh0504/react-hooks": "workspace:^",
+    "@shanmukh0504/utils": "workspace:^",
+    "@shanmukh0504/wallet-connectors": "workspace:^",
     "@tanstack/react-query": "^5.59.0",
     "@vitejs/plugin-react-swc": "^3.7.1",
     "autoprefixer": "^10.4.20",

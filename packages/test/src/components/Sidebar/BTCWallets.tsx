@@ -1,7 +1,7 @@
 import {
     IInjectedBitcoinProvider,
     useBitcoinWallet,
-} from '@gardenfi/wallet-connectors';
+} from '@shanmukh0504/wallet-connectors';
 import { Button } from '../common/Button';
 import { useState } from 'react';
 

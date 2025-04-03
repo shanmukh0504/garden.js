@@ -1,6 +1,6 @@
 import { BitcoinNetwork, IBaseWallet } from '@catalogfi/wallets';
-import { Environment, with0x } from '@gardenfi/utils';
-import { Chain } from '@gardenfi/orderbook';
+import { Environment, with0x } from '@shanmukh0504/utils';
+import { Chain } from '@shanmukh0504/orderbook';
 import { sha256 } from 'viem';
 import * as varuint from 'varuint-bitcoin';
 import { trim0x } from '@catalogfi/utils';
@@ -126,8 +126,8 @@ export function validateBTCAddress(address: string, networkType: Environment) {
     networkType === Environment.MAINNET
       ? bitcoin.networks.bitcoin
       : networkType === Environment.TESTNET
-      ? bitcoin.networks.testnet
-      : bitcoin.networks.regtest;
+        ? bitcoin.networks.testnet
+        : bitcoin.networks.regtest;
 
   if (!network) return false;
   bitcoin.initEccLib(ecc);

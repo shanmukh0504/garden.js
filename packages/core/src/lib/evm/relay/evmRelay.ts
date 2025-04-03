@@ -3,11 +3,11 @@ import {
   checkAllowanceAndApprove,
   Ok,
   Err,
-} from '@gardenfi/utils';
+} from '@shanmukh0504/utils';
 import { WalletClient, getContract } from 'viem';
-import { MatchedOrder } from '@gardenfi/orderbook';
+import { MatchedOrder } from '@shanmukh0504/orderbook';
 import { Fetcher, trim0x } from '@catalogfi/utils';
-import { APIResponse, IAuth, Url, with0x } from '@gardenfi/utils';
+import { APIResponse, IAuth, Url, with0x } from '@shanmukh0504/utils';
 import { AtomicSwapABI } from '../abi/atomicSwap';
 import { IEVMHTLC } from '../htlc.types';
 

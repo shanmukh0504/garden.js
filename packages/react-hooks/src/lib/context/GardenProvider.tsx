@@ -8,15 +8,15 @@ import {
   Quote,
   SecretManager,
   switchOrAddNetwork,
-} from '@gardenfi/core';
-import { SwapParams } from '@gardenfi/core';
+} from '@shanmukh0504/core';
+import { SwapParams } from '@shanmukh0504/core';
 import type {
   GardenContextType,
   GardenProviderProps,
   QuoteParams,
 } from './gardenProvider.types';
 import { Err, Ok } from '@catalogfi/utils';
-import { isBitcoin, MatchedOrder } from '@gardenfi/orderbook';
+import { isBitcoin, MatchedOrder } from '@shanmukh0504/orderbook';
 import { constructOrderpair } from '../utils';
 
 export const GardenContext = createContext<GardenContextType>({

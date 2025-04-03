@@ -1,5 +1,5 @@
 import { AsyncResult } from '@catalogfi/utils';
-import { APIResponse, IAuth, IStore } from '@gardenfi/utils';
+import { APIResponse, IAuth, IStore } from '@shanmukh0504/utils';
 import { Asset, Chain } from '../asset';
 import { IOrderProvider } from '../orders/orders.types';
 

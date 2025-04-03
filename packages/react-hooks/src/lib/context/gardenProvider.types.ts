@@ -1,9 +1,9 @@
 import { WalletClient } from 'viem';
-import { OrderWithStatus } from '@gardenfi/core';
+import { OrderWithStatus } from '@shanmukh0504/core';
 import { AsyncResult, Request, Result } from '@catalogfi/utils';
-import { IGardenJS, IQuote, QuoteResponse, SwapParams } from '@gardenfi/core';
-import { Asset, IOrderbook, MatchedOrder } from '@gardenfi/orderbook';
-import { Environment, IStore, SiweOpts } from '@gardenfi/utils';
+import { IGardenJS, IQuote, QuoteResponse, SwapParams } from '@shanmukh0504/core';
+import { Asset, IOrderbook, MatchedOrder } from '@shanmukh0504/orderbook';
+import { Environment, IStore, SiweOpts } from '@shanmukh0504/utils';
 
 export type GardenContextType = {
   /**
