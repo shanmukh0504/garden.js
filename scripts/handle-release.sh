@@ -43,7 +43,17 @@ replace_with_npm_version() {
 
   VERSION=$(npm view "$DEPENDENCY_NAME" version)
 
-  jq --arg dep "$DEPENDENCY_NAME" --arg version "$VERSION" \
+  CURRENT_VERSION=$(jq -r --arg dep "$DEPENDENCY_NAME" \
+    '.dependencies[$dep] // .devDependencies[$dep]' "$PACKAGE_JSON_PATH")
+
+  if [[ "$CURRENT_VERSION" == "workspace:^"* ]]; then
+    echo "Dependency $DEPENDENCY_NAME is already using the workspace version: $CURRENT_VERSION"
+    return
+  fi
+
+  echo "Updating dependency $DEPENDENCY_NAME version to workspace:^ for publishing"
+
+  jq --arg dep "$DEPENDENCY_NAME" --arg version "workspace:^$VERSION" \
     '(.dependencies[$dep] // .devDependencies[$dep]) = $version' "$PACKAGE_JSON_PATH" > "$PACKAGE_JSON_PATH.tmp" && mv "$PACKAGE_JSON_PATH.tmp" "$PACKAGE_JSON_PATH"
 }
 
