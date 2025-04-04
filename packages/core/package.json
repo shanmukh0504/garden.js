@@ -27,8 +27,8 @@
   },
   "dependencies": {
     "@catalogfi/wallets": "^0.2.59",
-    "@shanmukh0504/orderbook": "0.0.4",
-    "@shanmukh0504/utils": "0.0.4",
+    "@shanmukh0504/orderbook": "workspace:^",
+    "@shanmukh0504/utils": "workspace:^",
     "bignumber.js": "^9.1.2",
     "bitcoinjs-lib": "^6.1.6",
     "crypto-browserify": "^3.12.1",
