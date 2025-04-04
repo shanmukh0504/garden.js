@@ -230,11 +230,6 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
   echo "Bumping $PACKAGE_NAME to $NEW_VERSION"
   jq --arg new_version "$NEW_VERSION" '.version = $new_version' package.json > package.tmp.json && mv package.tmp.json package.json
 
-  jq -r '.dependencies | keys[]' package.json | grep '^@shanmukh0504/' | while read DEPENDENCY; do
-    echo "Updating $DEPENDENCY to the latest version from npm..."
-    replace_with_npm_version "package.json" "$DEPENDENCY"
-  done
-  
   if [[ "$VERSION_BUMP" == "prerelease" ]]; then
     npm publish --tag beta --access public
   else
@@ -251,7 +246,10 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
     fi
   fi
 
-  git checkout -- package.json
+  jq -r '.dependencies | keys[]' package.json | grep '^@shanmukh0504/' | while read DEPENDENCY; do
+    echo "Updating $DEPENDENCY to the latest version from npm..."
+    replace_with_npm_version "package.json" "$DEPENDENCY"
+  done
   cd - > /dev/null
 done
 
