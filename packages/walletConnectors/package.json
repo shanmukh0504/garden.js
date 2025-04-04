@@ -1,6 +1,6 @@
 {
   "name": "@shanmukh0504/wallet-connectors",
-  "version": "3.0.13",
+  "version": "3.0.14",
   "type": "module",
   "scripts": {
     "build": "vite build",
@@ -38,7 +38,7 @@
   "dependencies": {
     "@catalogfi/utils": "^0.1.11",
     "@catalogfi/wallets": "^0.2.54",
-    "@shanmukh0504/utils": "workspace:^",
+    "@shanmukh0504/utils": "0.0.10",
     "axios": "^1.7.9",
     "bitcoinjs-lib": "^7.0.0-rc.0",
     "react": "^18.3.1",
