@@ -40,6 +40,9 @@ echo "Version bump type detected: $VERSION_BUMP"
 replace_with_npm_version() {
   PACKAGE_JSON_PATH=$1
   DEPENDENCY_NAME=$2
+  ORIGINAL_VERSION=$(jq -r ".dependencies[\"$DEPENDENCY_NAME\"] // .devDependencies[\"$DEPENDENCY_NAME\"]" "$PACKAGE_JSON_PATH")
+
+  DEPENDENCY_VERSIONS["$DEPENDENCY_NAME"]=$ORIGINAL_VERSION
 
   VERSION=$(npm view "$DEPENDENCY_NAME" version)
 
@@ -228,6 +231,10 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
     npm publish --tag beta --access public
   else
     if [[ "$IS_PR" != "true" ]]; then
+      git add package.json
+      git -c user.email="$COMMIT_EMAIL" \
+          -c user.name="$COMMIT_NAME" \
+          commit -m "V$NEW_VERSION"
       npm publish --access public
       git tag "$PACKAGE_NAME@$NEW_VERSION"
       git push https://x-access-token:${GH_PAT}@github.com/shanmukh0504/garden.js.git HEAD:main --tags
@@ -236,7 +243,13 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
     fi
   fi
 
-  git checkout -- package.json
+  for DEP in "${!DEPENDENCY_VERSIONS[@]}"; do
+    ORIGINAL_VERSION="${DEPENDENCY_VERSIONS[$DEP]}"
+    echo "Restoring $DEP to original version $ORIGINAL_VERSION"
+    jq --arg dep "$DEP" --arg version "$ORIGINAL_VERSION" \
+      '(.dependencies[$dep] // .devDependencies[$dep]) = $version' package.json > package.tmp.json && mv package.tmp.json package.json
+  done
+  
   cd - > /dev/null
 done
 
