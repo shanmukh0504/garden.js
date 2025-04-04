@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e
-set -x
 
 COMMIT_EMAIL=$(git log -1 --pretty=format:'%ae')
 COMMIT_NAME=$(git log -1 --pretty=format:'%an')
@@ -36,25 +35,6 @@ else
 fi
 
 echo "Version bump type detected: $VERSION_BUMP"
-
-replace_with_npm_version() {
-  PACKAGE_JSON_PATH=$1
-  DEPENDENCY_NAME=$2
-
-  VERSION=$(npm view "$DEPENDENCY_NAME" version)
-
-  CURRENT_VERSION=$(jq -r --arg dep "$DEPENDENCY_NAME" \
-    '.dependencies[$dep] // .devDependencies[$dep]' "$PACKAGE_JSON_PATH" || true)
-
-  if [[ "$CURRENT_VERSION" == "workspace:^" ]]; then
-    jq --arg dep "$DEPENDENCY_NAME" --arg version "$VERSION" \
-      '(.dependencies[$dep] // .devDependencies[$dep]) = $version' "$PACKAGE_JSON_PATH" > "$PACKAGE_JSON_PATH.tmp" && mv "$PACKAGE_JSON_PATH.tmp" "$PACKAGE_JSON_PATH"
-  else
-    jq --arg dep "$DEPENDENCY_NAME" --arg version "workspace:^" \
-      '(.dependencies[$dep] // .devDependencies[$dep]) = $version' "$PACKAGE_JSON_PATH" > "$PACKAGE_JSON_PATH.tmp" && mv "$PACKAGE_JSON_PATH.tmp" "$PACKAGE_JSON_PATH"
-  fi
-}
-
 
 if [[ "$IS_PR" == "true" && -n "$PR_BRANCH" ]]; then
   git fetch origin "$PR_BRANCH:$PR_BRANCH"
@@ -201,60 +181,7 @@ export -f increment_version
 
 yarn workspaces foreach --all --topological --no-private run build
 
-for PKG in "${PUBLISH_ORDER[@]}"; do
-  echo ""
-  echo "📦 Processing $PKG..."
-  PKG_DIR="${PKG_NAME_TO_DIR[$PKG]}"
-  cd "packages/$PKG_DIR"
-
-  PACKAGE_NAME=$(jq -r .name package.json)
-
-  jq -r '.dependencies | keys[]' package.json | grep '^@shanmukh0504/' | while read DEPENDENCY; do
-    echo "Updating $DEPENDENCY to the latest version from npm..."
-    replace_with_npm_version "package.json" "$DEPENDENCY"
-  done
-
-  LATEST_STABLE_VERSION=$(npm view $PACKAGE_NAME version || jq -r .version package.json)
-
-  echo "Latest version: $LATEST_STABLE_VERSION"
-
-  if [[ "$VERSION_BUMP" == "prerelease" ]]; then
-    LATEST_BETA_VERSION=$(npm view $PACKAGE_NAME versions --json | jq -r '[.[] | select(contains("-beta"))] | max // empty')
-    if [[ -n "$LATEST_BETA_VERSION" ]]; then
-      BETA_NUMBER=$(echo "$LATEST_BETA_VERSION" | sed -E "s/.*-beta\.([0-9]+)/\1/")
-      NEW_VERSION="${LATEST_STABLE_VERSION}-beta.$((BETA_NUMBER + 1))"
-    else
-      NEW_VERSION="${LATEST_STABLE_VERSION}-beta.0"
-    fi
-  else
-    NEW_VERSION=$(increment_version "$LATEST_STABLE_VERSION" "$VERSION_BUMP")
-  fi
-
-  echo "Bumping $PACKAGE_NAME to $NEW_VERSION"
-  jq --arg new_version "$NEW_VERSION" '.version = $new_version' package.json > package.tmp.json && mv package.tmp.json package.json
-
-  if [[ "$VERSION_BUMP" == "prerelease" ]]; then
-    npm publish --tag beta --access public
-  else
-    if [[ "$IS_PR" != "true" ]]; then
-      git add package.json
-      git -c user.email="$COMMIT_EMAIL" \
-          -c user.name="$COMMIT_NAME" \
-          commit -m "V$NEW_VERSION"
-      npm publish --access public
-      git tag "$PACKAGE_NAME@$NEW_VERSION"
-      git push https://x-access-token:${GH_PAT}@github.com/shanmukh0504/garden.js.git HEAD:main --tags
-    else
-      echo "Skipping commit for PR."
-    fi
-  fi
-
-  jq -r '.dependencies | keys[]' package.json | grep '^@shanmukh0504/' | while read DEPENDENCY; do
-    echo "Reverting $DEPENDENCY to workspace:^"
-    replace_with_npm_version "package.json" "$DEPENDENCY"
-  done
-  cd - > /dev/null
-done
+yarn workspaces foreach -p --topological --include \"packages/*\" --since=main --no-private npm publish
 
 yarn config unset yarnPath
 jq 'del(.packageManager)' package.json > temp.json && mv temp.json package.json
