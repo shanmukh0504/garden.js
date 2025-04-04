@@ -46,7 +46,7 @@ replace_with_npm_version() {
   CURRENT_VERSION=$(jq -r --arg dep "$DEPENDENCY_NAME" \
     '.dependencies[$dep] // .devDependencies[$dep]' "$PACKAGE_JSON_PATH" || true)
 
-  if [[ "$CURRENT_VERSION" == "workspace^" ]]; then
+  if [[ "$CURRENT_VERSION" == "workspace:^" ]]; then
     jq --arg dep "$DEPENDENCY_NAME" --arg version "$VERSION" \
       '(.dependencies[$dep] // .devDependencies[$dep]) = $version' "$PACKAGE_JSON_PATH" > "$PACKAGE_JSON_PATH.tmp" && mv "$PACKAGE_JSON_PATH.tmp" "$PACKAGE_JSON_PATH"
   else

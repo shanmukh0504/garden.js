@@ -35,3 +35,12 @@ export class Url extends URL {
     return new Url(`${this.pathname}?${url.toString()}`, this);
   }
 }
+
+export const isUrl = (url: string) => {
+  try {
+    new URL(url);
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
