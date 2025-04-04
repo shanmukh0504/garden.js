@@ -41,19 +41,15 @@ replace_with_npm_version() {
   PACKAGE_JSON_PATH=$1
   DEPENDENCY_NAME=$2
 
-  VERSION=$(npm view "$DEPENDENCY_NAME" version)
+  CURRENT_VERSION=$(jq -r ".dependencies[$dep] // .devDependencies[$dep]" "$PACKAGE_JSON_PATH")
 
-  CURRENT_VERSION=$(jq -r --arg dep "$DEPENDENCY_NAME" \
-    '.dependencies[$dep] // .devDependencies[$dep]' "$PACKAGE_JSON_PATH")
-
-  if [[ "$CURRENT_VERSION" == "workspace:^"* ]]; then
-    echo "Dependency $DEPENDENCY_NAME is already using the workspace version: $CURRENT_VERSION"
-    return
+  if [[ "$CURRENT_VERSION" == "workspace:^" ]]; then
+    VERSION=$(npm view "$DEPENDENCY_NAME" version)
+  else
+    VERSION="workspace:^"
   fi
 
-  echo "Updating dependency $DEPENDENCY_NAME version to workspace:^ for publishing"
-
-  jq --arg dep "$DEPENDENCY_NAME" --arg version "workspace:^$VERSION" \
+  jq --arg dep "$DEPENDENCY_NAME" --arg version "$VERSION" \
     '(.dependencies[$dep] // .devDependencies[$dep]) = $version' "$PACKAGE_JSON_PATH" > "$PACKAGE_JSON_PATH.tmp" && mv "$PACKAGE_JSON_PATH.tmp" "$PACKAGE_JSON_PATH"
 }
 
@@ -234,6 +230,11 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
   echo "Bumping $PACKAGE_NAME to $NEW_VERSION"
   jq --arg new_version "$NEW_VERSION" '.version = $new_version' package.json > package.tmp.json && mv package.tmp.json package.json
 
+  jq -r '.dependencies | keys[]' package.json | grep '^@shanmukh0504/' | while read DEPENDENCY; do
+    echo "Updating $DEPENDENCY to the latest version from npm..."
+    replace_with_npm_version "package.json" "$DEPENDENCY"
+  done
+  
   if [[ "$VERSION_BUMP" == "prerelease" ]]; then
     npm publish --tag beta --access public
   else
