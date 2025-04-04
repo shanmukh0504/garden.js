@@ -27,9 +27,9 @@
   },
   "dependencies": {
     "@catalogfi/wallets": "^0.2.59",
-    "@shanmukh0504/core": "0.0.13",
-    "@shanmukh0504/orderbook": "0.0.13",
-    "@shanmukh0504/utils": "0.0.10",
+    "@shanmukh0504/core": "workspace:^",
+    "@shanmukh0504/orderbook": "workspace:^",
+    "@shanmukh0504/utils": "workspace:^",
     "react": "^18.3.1",
     "viem": "^2.21.23"
   },
