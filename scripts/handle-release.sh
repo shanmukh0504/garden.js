@@ -41,17 +41,20 @@ replace_with_npm_version() {
   PACKAGE_JSON_PATH=$1
   DEPENDENCY_NAME=$2
 
-  CURRENT_VERSION=$(jq -r ".dependencies[$dep] // .devDependencies[$dep]" "$PACKAGE_JSON_PATH")
+  VERSION=$(npm view "$DEPENDENCY_NAME" version)
 
-  if [[ "$CURRENT_VERSION" == "workspace:^" ]]; then
-    VERSION=$(npm view "$DEPENDENCY_NAME" version)
+  CURRENT_VERSION=$(jq -r --arg dep "$DEPENDENCY_NAME" \
+    '.dependencies[$dep] // .devDependencies[$dep]' "$PACKAGE_JSON_PATH" || true)
+
+  if [[ "$CURRENT_VERSION" == "workspace^" ]]; then
+    jq --arg dep "$DEPENDENCY_NAME" --arg version "$VERSION" \
+      '(.dependencies[$dep] // .devDependencies[$dep]) = $version' "$PACKAGE_JSON_PATH" > "$PACKAGE_JSON_PATH.tmp" && mv "$PACKAGE_JSON_PATH.tmp" "$PACKAGE_JSON_PATH"
   else
-    VERSION="workspace:^"
+    jq --arg dep "$DEPENDENCY_NAME" --arg version "workspace:^" \
+      '(.dependencies[$dep] // .devDependencies[$dep]) = $version' "$PACKAGE_JSON_PATH" > "$PACKAGE_JSON_PATH.tmp" && mv "$PACKAGE_JSON_PATH.tmp" "$PACKAGE_JSON_PATH"
   fi
-
-  jq --arg dep "$DEPENDENCY_NAME" --arg version "$VERSION" \
-    '(.dependencies[$dep] // .devDependencies[$dep]) = $version' "$PACKAGE_JSON_PATH" > "$PACKAGE_JSON_PATH.tmp" && mv "$PACKAGE_JSON_PATH.tmp" "$PACKAGE_JSON_PATH"
 }
+
 
 if [[ "$IS_PR" == "true" && -n "$PR_BRANCH" ]]; then
   git fetch origin "$PR_BRANCH:$PR_BRANCH"
@@ -247,7 +250,7 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
   fi
 
   jq -r '.dependencies | keys[]' package.json | grep '^@shanmukh0504/' | while read DEPENDENCY; do
-    echo "Updating $DEPENDENCY to the latest version from npm..."
+    echo "Reverting $DEPENDENCY to workspace:^"
     replace_with_npm_version "package.json" "$DEPENDENCY"
   done
   cd - > /dev/null
