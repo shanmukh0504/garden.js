@@ -80,26 +80,6 @@ fi
 echo "Changed packages:"
 echo "$CHANGED"
 
-for PKG in $CHANGED; do
-  PKG_DIR="packages/$PKG"
-  
-  if [[ -f "$PKG_DIR/package.json" ]]; then
-    DEPENDENCIES=$(jq -r '.dependencies | to_entries[] | select(.value == "workspace:^") | .key' "$PKG_DIR/package.json")
-    
-    for DEP in $DEPENDENCIES; do
-      LATEST_VERSION=$(npm view "$DEP" version)
-
-      if [[ -n "$LATEST_VERSION" ]]; then
-        echo "Replacing workspace:^ with actual version $LATEST_VERSION for $DEP in $PKG_DIR/package.json"
-        jq --arg dep "$DEP" --arg version "$LATEST_VERSION" \
-          '(.dependencies[$dep] = $version)' "$PKG_DIR/package.json" > temp.json && mv temp.json "$PKG_DIR/package.json"
-      fi
-    done
-  fi
-done
-
-echo "Updated package.json files to resolve workspace dependencies."
-
 if [[ -z "$CHANGED" ]]; then
   echo "No packages changed. Skipping publish."
   exit 0
@@ -224,8 +204,11 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
     NEW_VERSION=$(increment_version "$LATEST_STABLE_VERSION" "$VERSION_BUMP")
   fi
 
-  echo "Bumping $PACKAGE_NAME to $NEW_VERSION"
+    echo "Bumping $PACKAGE_NAME to $NEW_VERSION"
   jq --arg new_version "$NEW_VERSION" '.version = $new_version' package.json > package.tmp.json && mv package.tmp.json package.json
+
+  jq --arg pkg_name "$PACKAGE_NAME" --arg new_version "$NEW_VERSION" \
+    '(.dependencies // {}) | with_entries(select(.key != $pkg_name) | .value = $new_version)' package.json > package.tmp.json && mv package.tmp.json package.json
 
   if [[ "$VERSION_BUMP" == "prerelease" ]]; then
     npm publish --tag beta --access public
