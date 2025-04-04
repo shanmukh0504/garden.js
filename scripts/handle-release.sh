@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e
-set -x
 
 COMMIT_EMAIL=$(git log -1 --pretty=format:'%ae')
 COMMIT_NAME=$(git log -1 --pretty=format:'%an')
@@ -36,6 +35,16 @@ else
 fi
 
 echo "Version bump type detected: $VERSION_BUMP"
+
+replace_with_npm_version() {
+  PACKAGE_JSON_PATH=$1
+  DEPENDENCY_NAME=$2
+
+  VERSION=$(npm view "$DEPENDENCY_NAME" version)
+
+  jq --arg dep "$DEPENDENCY_NAME" --arg version "$VERSION" \
+    '(.dependencies[$dep] // .devDependencies[$dep]) = $version' "$PACKAGE_JSON_PATH" > "$PACKAGE_JSON_PATH.tmp" && mv "$PACKAGE_JSON_PATH.tmp" "$PACKAGE_JSON_PATH"
+}
 
 if [[ "$IS_PR" == "true" && -n "$PR_BRANCH" ]]; then
   git fetch origin "$PR_BRANCH:$PR_BRANCH"
@@ -189,6 +198,12 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
   cd "packages/$PKG_DIR"
 
   PACKAGE_NAME=$(jq -r .name package.json)
+
+  jq -r '.dependencies | keys[]' package.json | grep '^@shanmukh0504/' | while read DEPENDENCY; do
+    echo "Updating $DEPENDENCY to the latest version from npm..."
+    replace_with_npm_version "package.json" "$DEPENDENCY"
+  done
+
   LATEST_STABLE_VERSION=$(npm view $PACKAGE_NAME version || jq -r .version package.json)
 
   echo "Latest version: $LATEST_STABLE_VERSION"
@@ -205,11 +220,8 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
     NEW_VERSION=$(increment_version "$LATEST_STABLE_VERSION" "$VERSION_BUMP")
   fi
 
-    echo "Bumping $PACKAGE_NAME to $NEW_VERSION"
+  echo "Bumping $PACKAGE_NAME to $NEW_VERSION"
   jq --arg new_version "$NEW_VERSION" '.version = $new_version' package.json > package.tmp.json && mv package.tmp.json package.json
-
-  jq --arg pkg_name "$PACKAGE_NAME" --arg new_version "$NEW_VERSION" \
-    '(.dependencies // {}) | with_entries(select(.key != $pkg_name) | .value = $new_version)' package.json > package.tmp.json && mv package.tmp.json package.json
 
   if [[ "$VERSION_BUMP" == "prerelease" ]]; then
     npm publish --tag beta --access public
@@ -227,6 +239,7 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
     fi
   fi
 
+  git checkout package.json
   cd - > /dev/null
 done
 
