@@ -205,7 +205,7 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
     '
   else
     if [[ "$IS_PR" != "true" ]]; then
-      yarn workspaces foreach --include "$PKG" --topological --no-private --verbose exec bash -c '
+      yarn workspaces foreach --all --include "$PKG" --topological --no-private --verbose exec bash -c '
         PKG_NAME=$(jq -r .name package.json)
         COMMIT_EMAIL='"$COMMIT_EMAIL"'
         COMMIT_NAME='"$COMMIT_NAME"'
