@@ -182,42 +182,67 @@ export -f increment_version
 
 yarn workspaces foreach --all --topological --no-private run build
 
-yarn workspaces foreach \
-  --all \
-  --include "$PKG" \
-  --no-private \
-  --topological-dev \
-  --verbose \
-  exec -- bash -c "
-    PACKAGE_NAME=\$(jq -r .name package.json)
-    LATEST_VERSION=\$(npm view \"\$PACKAGE_NAME\" version || jq -r .version package.json)
-    echo \"🔍 \$PACKAGE_NAME current version on npm: \$LATEST_VERSION\"
+for PKG in "${PUBLISH_ORDER[@]}"; do
+  echo ""
+  echo "📦 Publishing $PKG via yarn workspaces foreach..."
 
-    NODE_SCRIPT=\$(cat <<EOF
-      const semver = require('semver');
-      const current = \"$LATEST_VERSION\";
-      const bump = \"$VERSION_BUMP\";
-      const suffix = \"$PRERELEASE_SUFFIX\";
+  if [[ "$VERSION_BUMP" == "prerelease" ]]; then
+    yarn workspaces foreach --include "$PKG" --topological --no-private --verbose exec bash -c '
+      PKG_NAME=$(jq -r .name package.json)
+      LATEST_STABLE_VERSION=$(npm view $PKG_NAME version || jq -r .version package.json)
+      LATEST_BETA_VERSION=$(npm view $PKG_NAME versions --json | jq -r "[.[] | select(contains(\"-beta\"))] | max // empty")
 
-      if (bump === 'prerelease') {
-        const next = semver.inc(current, 'prerelease', suffix) || (semver.inc(current, 'patch') + '-' + suffix + '.0');
-        console.log(next);
-      } else {
-        console.log(semver.inc(current, bump));
-      }
-EOF
-    )
+      if [[ -n "$LATEST_BETA_VERSION" ]]; then
+        BETA_NUMBER=$(echo "$LATEST_BETA_VERSION" | sed -E "s/.*-beta\.([0-9]+)/\1/")
+        NEW_VERSION="${LATEST_STABLE_VERSION}-beta.$((BETA_NUMBER + 1))"
+      else
+        NEW_VERSION="${LATEST_STABLE_VERSION}-beta.0"
+      fi
 
-    NEW_VERSION=\$(node -e \"\$NODE_SCRIPT\")
-    echo \"🚀 Publishing \$PACKAGE_NAME@\${NEW_VERSION}\"
-    jq --arg new_version \"\$NEW_VERSION\" '.version = \$new_version' package.json > package.tmp.json && mv package.tmp.json package.json
+      echo "Publishing $PKG_NAME@$NEW_VERSION (beta)"
+      jq --arg new_version "$NEW_VERSION" ".version = \$new_version" package.json > package.tmp.json && mv package.tmp.json package.json
+      npm publish --tag beta --access public
+    '
+  else
+    if [[ "$IS_PR" != "true" ]]; then
+      yarn workspaces foreach --include "$PKG" --topological --no-private --verbose exec bash -c '
+        PKG_NAME=$(jq -r .name package.json)
+        COMMIT_EMAIL='"$COMMIT_EMAIL"'
+        COMMIT_NAME='"$COMMIT_NAME"'
+        LATEST_VERSION=$(npm view $PKG_NAME version || jq -r .version package.json)
+        VERSION_BUMP='"$VERSION_BUMP"'
 
-    if [[ \"$VERSION_BUMP\" == \"prerelease\" ]]; then
-      npm publish --tag \"$PRERELEASE_SUFFIX\" --access public
+        increment_version() {
+          VERSION=$1
+          VERSION_TYPE=$2
+          IFS="." read -r -a VERSION_PARTS <<< "$VERSION"
+          MAJOR=${VERSION_PARTS[0]}
+          MINOR=${VERSION_PARTS[1]}
+          PATCH=${VERSION_PARTS[2]}
+          case $VERSION_TYPE in
+            "major") MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
+            "minor") MINOR=$((MINOR + 1)); PATCH=0 ;;
+            "patch") PATCH=$((PATCH + 1)) ;;
+            *) echo "Invalid version bump type: $VERSION_TYPE"; exit 1 ;;
+          esac
+          echo "${MAJOR}.${MINOR}.${PATCH}"
+        }
+
+        NEW_VERSION=$(increment_version "$LATEST_VERSION" "$VERSION_BUMP")
+
+        echo "Publishing $PKG_NAME@$NEW_VERSION"
+        jq --arg new_version "$NEW_VERSION" ".version = \$new_version" package.json > package.tmp.json && mv package.tmp.json package.json
+        git add package.json
+        git -c user.email="$COMMIT_EMAIL" -c user.name="$COMMIT_NAME" commit -m "V$NEW_VERSION"
+        npm publish --access public
+        git tag "$PKG_NAME@$NEW_VERSION"
+        git push https://x-access-token:'"$GH_PAT"'@github.com/shanmukh0504/garden.js.git HEAD:main --tags
+      '
     else
-      npm publish --access public
+      echo "🔒 Skipping commit and publish for PR workspace: $PKG"
     fi
-  "
+  fi
+done
 
 yarn config unset yarnPath
 jq 'del(.packageManager)' package.json > temp.json && mv temp.json package.json
