@@ -20,8 +20,10 @@
     "@eslint/js": "^9.6.0",
     "@types/chrome": "^0.0.268",
     "@types/node": "^22.7.4",
+    "@types/semver": "^7",
     "eslint": "9.x",
     "globals": "^15.8.0",
+    "semver": "^7.7.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.2",
     "typescript-eslint": "^7.15.0",
@@ -32,5 +34,6 @@
   },
   "dependencies": {
     "@catalogfi/utils": "^0.1.12"
-  }
+  },
+  "packageManager": "yarn@4.5.1"
 }
