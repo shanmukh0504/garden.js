@@ -187,33 +187,34 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
   echo "📦 Publishing $PKG in order..."
 
   yarn workspaces foreach \
-    --all \  # required by yarn even if we use --include
+    --all \
     --include "$PKG" \
     --no-private \
     --topological-dev \
     --verbose \
-    exec bash -c '
-      PACKAGE_NAME=$(jq -r .name package.json)
-      LATEST_VERSION=$(npm view "$PACKAGE_NAME" version || jq -r .version package.json)
-      echo "🔍 $PACKAGE_NAME current version on npm: $LATEST_VERSION"
+    exec -- bash -c "
+      PACKAGE_NAME=\$(jq -r .name package.json)
+      LATEST_VERSION=\$(npm view \"\$PACKAGE_NAME\" version || jq -r .version package.json)
+      echo \"🔍 \$PACKAGE_NAME current version on npm: \$LATEST_VERSION\"
 
-      NEW_VERSION=$(node -e "
-        const semver = require('semver');
-        const current = '$LATEST_VERSION';
-        const bump = '$VERSION_BUMP';
-        const suffix = '$PRERELEASE_SUFFIX';
-        if (bump === 'prerelease') {
-          const next = semver.inc(current, 'prerelease', suffix) || semver.inc(current, 'patch') + '-' + suffix + '.0';
+      NEW_VERSION=\$(node -e '
+        const semver = require(\"semver\");
+        const current = \"'$LATEST_VERSION'\";
+        const bump = \"'$VERSION_BUMP'\";
+        const suffix = \"'$PRERELEASE_SUFFIX'\";
+        if (bump === \"prerelease\") {
+          const next = semver.inc(current, \"prerelease\", suffix) || semver.inc(current, \"patch\") + \"-\" + suffix + \".0\";
           console.log(next);
         } else {
           console.log(semver.inc(current, bump));
         }
-      ")
+      ')
 
-      echo "🚀 Publishing $PACKAGE_NAME@$NEW_VERSION"
-      jq --arg new_version "$NEW_VERSION" ".version = \$new_version" package.json > package.tmp.json && mv package.tmp.json package.json
+      echo \"🚀 Publishing \$PACKAGE_NAME@\${NEW_VERSION}\"
+      jq --arg new_version \"\$NEW_VERSION\" '.version = \$new_version' package.json > package.tmp.json && mv package.tmp.json package.json
+
       npm publish ${VERSION_BUMP:+--tag $PRERELEASE_SUFFIX} --access public
-    '
+    "
 done
 
 yarn config unset yarnPath
