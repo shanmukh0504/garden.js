@@ -198,6 +198,7 @@ yarn workspaces foreach \
       const current = \"$LATEST_VERSION\";
       const bump = \"$VERSION_BUMP\";
       const suffix = \"$PRERELEASE_SUFFIX\";
+
       if (bump === 'prerelease') {
         const next = semver.inc(current, 'prerelease', suffix) || (semver.inc(current, 'patch') + '-' + suffix + '.0');
         console.log(next);
