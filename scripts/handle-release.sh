@@ -188,19 +188,18 @@ yarn workspaces foreach \
   --no-private \
   --topological-dev \
   --verbose \
-  exec -- bash -c '
-    PACKAGE_NAME=$(jq -r .name package.json)
-    LATEST_VERSION=$(npm view "$PACKAGE_NAME" version || jq -r .version package.json)
-    echo "🔍 $PACKAGE_NAME current version on npm: $LATEST_VERSION"
+  exec -- bash -c "
+    PACKAGE_NAME=\$(jq -r .name package.json)
+    LATEST_VERSION=\$(npm view \"\$PACKAGE_NAME\" version || jq -r .version package.json)
+    echo \"🔍 \$PACKAGE_NAME current version on npm: \$LATEST_VERSION\"
 
-    NODE_SCRIPT=$(cat <<EOF
-      const semver = require("semver");
-      const current = "$LATEST_VERSION";
-      const bump = "$VERSION_BUMP";
-      const suffix = "$PRERELEASE_SUFFIX";
-
-      if (bump === "prerelease") {
-        const next = semver.inc(current, "prerelease", suffix) || (semver.inc(current, "patch") + "-" + suffix + ".0");
+    NODE_SCRIPT=\$(cat <<EOF
+      const semver = require('semver');
+      const current = \"$LATEST_VERSION\";
+      const bump = \"$VERSION_BUMP\";
+      const suffix = \"$PRERELEASE_SUFFIX\";
+      if (bump === 'prerelease') {
+        const next = semver.inc(current, 'prerelease', suffix) || (semver.inc(current, 'patch') + '-' + suffix + '.0');
         console.log(next);
       } else {
         console.log(semver.inc(current, bump));
@@ -208,17 +207,16 @@ yarn workspaces foreach \
 EOF
     )
 
-    NEW_VERSION=$(node -e "$NODE_SCRIPT")
+    NEW_VERSION=\$(node -e \"\$NODE_SCRIPT\")
+    echo \"🚀 Publishing \$PACKAGE_NAME@\${NEW_VERSION}\"
+    jq --arg new_version \"\$NEW_VERSION\" '.version = \$new_version' package.json > package.tmp.json && mv package.tmp.json package.json
 
-    echo "🚀 Publishing $PACKAGE_NAME@$NEW_VERSION"
-    jq --arg new_version "$NEW_VERSION" ".version = \$new_version" package.json > package.tmp.json && mv package.tmp.json package.json
-
-    if [[ "$VERSION_BUMP" == "prerelease" ]]; then
-      npm publish --tag "$PRERELEASE_SUFFIX" --access public
+    if [[ \"$VERSION_BUMP\" == \"prerelease\" ]]; then
+      npm publish --tag \"$PRERELEASE_SUFFIX\" --access public
     else
       npm publish --access public
     fi
-  '
+  "
 
 yarn config unset yarnPath
 jq 'del(.packageManager)' package.json > temp.json && mv temp.json package.json
