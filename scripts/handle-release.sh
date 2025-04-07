@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e
-set -x
 
 COMMIT_EMAIL=$(git log -1 --pretty=format:'%ae')
 COMMIT_NAME=$(git log -1 --pretty=format:'%an')
@@ -184,64 +183,47 @@ yarn workspaces foreach --all --topological --no-private run build
 
 for PKG in "${PUBLISH_ORDER[@]}"; do
   echo ""
-  echo "📦 Publishing $PKG via yarn workspaces foreach..."
+  echo "📦 Processing $PKG..."
+  PKG_DIR="${PKG_NAME_TO_DIR[$PKG]}"
+  cd "packages/$PKG_DIR"
+
+  PACKAGE_NAME=$(jq -r .name package.json)
+  LATEST_STABLE_VERSION=$(npm view $PACKAGE_NAME version || jq -r .version package.json)
+
+  echo "Latest version: $LATEST_STABLE_VERSION"
 
   if [[ "$VERSION_BUMP" == "prerelease" ]]; then
-    yarn workspaces foreach --include "$PKG" --topological --no-private --verbose exec bash -c '
-      PKG_NAME=$(jq -r .name package.json)
-      LATEST_STABLE_VERSION=$(npm view $PKG_NAME version || jq -r .version package.json)
-      LATEST_BETA_VERSION=$(npm view $PKG_NAME versions --json | jq -r "[.[] | select(contains(\"-beta\"))] | max // empty")
+    LATEST_BETA_VERSION=$(npm view $PACKAGE_NAME versions --json | jq -r '[.[] | select(contains("-beta"))] | max // empty')
+    if [[ -n "$LATEST_BETA_VERSION" ]]; then
+      BETA_NUMBER=$(echo "$LATEST_BETA_VERSION" | sed -E "s/.*-beta\.([0-9]+)/\1/")
+      NEW_VERSION="${LATEST_STABLE_VERSION}-beta.$((BETA_NUMBER + 1))"
+    else
+      NEW_VERSION="${LATEST_STABLE_VERSION}-beta.0"
+    fi
+  else
+    NEW_VERSION=$(increment_version "$LATEST_STABLE_VERSION" "$VERSION_BUMP")
+  fi
 
-      if [[ -n "$LATEST_BETA_VERSION" ]]; then
-        BETA_NUMBER=$(echo "$LATEST_BETA_VERSION" | sed -E "s/.*-beta\.([0-9]+)/\1/")
-        NEW_VERSION="${LATEST_STABLE_VERSION}-beta.$((BETA_NUMBER + 1))"
-      else
-        NEW_VERSION="${LATEST_STABLE_VERSION}-beta.0"
-      fi
+  echo "Bumping $PACKAGE_NAME to $NEW_VERSION"
+  jq --arg new_version "$NEW_VERSION" '.version = $new_version' package.json > package.tmp.json && mv package.tmp.json package.json
 
-      echo "Publishing $PKG_NAME@$NEW_VERSION (beta)"
-      jq --arg new_version "$NEW_VERSION" ".version = \$new_version" package.json > package.tmp.json && mv package.tmp.json package.json
-      npm publish --tag beta --access public
-    '
+  if [[ "$VERSION_BUMP" == "prerelease" ]]; then
+    npm publish --tag beta --access public
   else
     if [[ "$IS_PR" != "true" ]]; then
-      yarn workspaces foreach --all --include "$PKG" --topological --no-private --verbose exec bash -c '
-        PKG_NAME=$(jq -r .name package.json)
-        COMMIT_EMAIL='"$COMMIT_EMAIL"'
-        COMMIT_NAME='"$COMMIT_NAME"'
-        LATEST_VERSION=$(npm view $PKG_NAME version || jq -r .version package.json)
-        VERSION_BUMP='"$VERSION_BUMP"'
-
-        increment_version() {
-          VERSION=$1
-          VERSION_TYPE=$2
-          IFS="." read -r -a VERSION_PARTS <<< "$VERSION"
-          MAJOR=${VERSION_PARTS[0]}
-          MINOR=${VERSION_PARTS[1]}
-          PATCH=${VERSION_PARTS[2]}
-          case $VERSION_TYPE in
-            "major") MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
-            "minor") MINOR=$((MINOR + 1)); PATCH=0 ;;
-            "patch") PATCH=$((PATCH + 1)) ;;
-            *) echo "Invalid version bump type: $VERSION_TYPE"; exit 1 ;;
-          esac
-          echo "${MAJOR}.${MINOR}.${PATCH}"
-        }
-
-        NEW_VERSION=$(increment_version "$LATEST_VERSION" "$VERSION_BUMP")
-
-        echo "Publishing $PKG_NAME@$NEW_VERSION"
-        jq --arg new_version "$NEW_VERSION" ".version = \$new_version" package.json > package.tmp.json && mv package.tmp.json package.json
-        git add package.json
-        git -c user.email="$COMMIT_EMAIL" -c user.name="$COMMIT_NAME" commit -m "V$NEW_VERSION"
-        npm publish --access public
-        git tag "$PKG_NAME@$NEW_VERSION"
-        git push https://x-access-token:'"$GH_PAT"'@github.com/shanmukh0504/garden.js.git HEAD:main --tags
-      '
+      git add package.json
+      git -c user.email="$COMMIT_EMAIL" \
+          -c user.name="$COMMIT_NAME" \
+          commit -m "V$NEW_VERSION"
+      npm publish --access public
+      git tag "$PACKAGE_NAME@$NEW_VERSION"
+      git push https://x-access-token:${GH_PAT}@github.com/shanmukh0504/garden.js.git HEAD:main --tags
     else
-      echo "🔒 Skipping commit and publish for PR workspace: $PKG"
+      echo "Skipping commit for PR."
     fi
   fi
+
+  cd - > /dev/null
 done
 
 yarn config unset yarnPath
