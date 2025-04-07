@@ -90,7 +90,7 @@ export const GardenProvider: FC<GardenProviderProps> = ({
     const newWalletClient = switchRes.val.walletClient;
 
     //only initiate if EVM
-    const initRes = await garden.relay.init(newWalletClient, order.val);
+    const initRes = await garden.reelay.init(newWalletClient, order.val);
     if (initRes.error) return Err(initRes.error);
 
     const updatedOrder: MatchedOrder = {
