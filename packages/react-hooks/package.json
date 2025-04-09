@@ -1,6 +1,6 @@
 {
   "name": "@shanmukh0504/react-hooks",
-  "version": "0.0.16",
+  "version": "3.0.0",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
