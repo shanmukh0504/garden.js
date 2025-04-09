@@ -184,6 +184,8 @@ else
 fi
 yarn workspaces foreach --all --topological --no-private run build
 
+echo "Publishing in order: ${PUBLISH_ORDER[@]}"
+
 for PKG in "${PUBLISH_ORDER[@]}"; do
   echo ""
   echo "📦 Processing $PKG..."
