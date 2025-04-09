@@ -1,6 +1,6 @@
 {
   "name": "@shanmukh0504/wallet-connectors",
-  "version": "3.0.18",
+  "version": "3.0.19",
   "type": "module",
   "scripts": {
     "build": "vite build",
