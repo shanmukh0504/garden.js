@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e
-set -x
 
 COMMIT_EMAIL=$(git log -1 --pretty=format:'%ae')
 COMMIT_NAME=$(git log -1 --pretty=format:'%an')
@@ -106,7 +105,7 @@ for PKG in $TOPO_ORDER; do
     continue
   fi
 
-  DEPS=$(jq -r '.dependencies // {} | keys[]' "packages/$PKG_DIR/package.json" 2>/dev/null | grep '^@gardenfi/' || true)
+  DEPS=$(jq -r '.dependencies // {} | keys[]' "packages/$PKG_DIR/package.json" 2>/dev/null | grep '^@shanmukh0504/' || true)
   for DEP in $DEPS; do
     if [[ -n "${REVERSE_DEP_MAP[$DEP]}" ]]; then
       REVERSE_DEP_MAP[$DEP]="${REVERSE_DEP_MAP[$DEP]} $PKG"
