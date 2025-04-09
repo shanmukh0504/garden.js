@@ -105,7 +105,7 @@ for PKG in $TOPO_ORDER; do
     continue
   fi
 
-  DEPS=$(jq -r '.dependencies // {} | keys[]' "packages/$PKG_DIR/package.json" 2>/dev/null | grep '^@shanmukh0504/' || true)
+  DEPS=$(jq -r '.dependencies // {} | keys[]' "packages/$PKG_DIR/package.json" 2>/dev/null | grep '^@gardenfi/' || true)
   for DEP in $DEPS; do
     if [[ -n "${REVERSE_DEP_MAP[$DEP]}" ]]; then
       REVERSE_DEP_MAP[$DEP]="${REVERSE_DEP_MAP[$DEP]} $PKG"
@@ -159,12 +159,12 @@ increment_version() {
     "minor") MINOR=$((MINOR + 1)); PATCH=0 ;;
     "patch") PATCH=$((PATCH + 1)) ;;
     "prerelease")
-      if [[ $VERSION =~ -beta\.[0-9]+$ ]]; then
-        PRERELEASE_NUM=$(( ${VERSION##*-beta.} + 1 ))
+      if [[ $VERSION =~ -alpha\.[0-9]+$ ]]; then
+        PRERELEASE_NUM=$(( ${VERSION##*-alpha.} + 1 ))
       else
         PRERELEASE_NUM=0
       fi
-      PRERELEASE="beta.${PRERELEASE_NUM}"
+      PRERELEASE="alpha.${PRERELEASE_NUM}"
       ;;
     *) echo "Invalid version bump type: $VERSION_TYPE"; exit 1 ;;
   esac
@@ -196,12 +196,12 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
   echo "Latest version: $LATEST_STABLE_VERSION"
 
   if [[ "$VERSION_BUMP" == "prerelease" ]]; then
-    LATEST_BETA_VERSION=$(npm view $PACKAGE_NAME versions --json | jq -r '[.[] | select(contains("-beta"))] | max // empty')
+    LATEST_BETA_VERSION=$(npm view $PACKAGE_NAME versions --json | jq -r '[.[] | select(contains("-alpha"))] | max // empty')
     if [[ -n "$LATEST_BETA_VERSION" ]]; then
-      BETA_NUMBER=$(echo "$LATEST_BETA_VERSION" | sed -E "s/.*-beta\.([0-9]+)/\1/")
-      NEW_VERSION="${LATEST_STABLE_VERSION}-beta.$((BETA_NUMBER + 1))"
+      BETA_NUMBER=$(echo "$LATEST_BETA_VERSION" | sed -E "s/.*-alpha\.([0-9]+)/\1/")
+      NEW_VERSION="${LATEST_STABLE_VERSION}-alpha.$((BETA_NUMBER + 1))"
     else
-      NEW_VERSION="${LATEST_STABLE_VERSION}-beta.0"
+      NEW_VERSION="${LATEST_STABLE_VERSION}-alpha.0"
     fi
   else
     NEW_VERSION=$(increment_version "$LATEST_STABLE_VERSION" "$VERSION_BUMP")
@@ -210,8 +210,10 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
   echo "Bumping $PACKAGE_NAME to $NEW_VERSION"
   jq --arg new_version "$NEW_VERSION" '.version = $new_version' package.json > package.tmp.json && mv package.tmp.json package.json
 
+  export NPM_TOKEN=$NPM_TOKEN
+
   if [[ "$VERSION_BUMP" == "prerelease" ]]; then
-    yarn npm publish --tag beta --access public
+    yarn npm publish --tag alpha --access public
   else
     if [[ "$IS_PR" != "true" ]]; then
       git add package.json
