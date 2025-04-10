@@ -210,11 +210,13 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
 
   # If a beta version exists, pass it to increment_version
   if [[ -n "$LATEST_BETA_VERSION" ]]; then
-      # Extract the beta part of the version (e.g., "4.0.0-beta.9")
+      # Extract the base version (without the -beta part)
       BASE_VERSION=$(echo "$LATEST_BETA_VERSION" | sed -E 's/([0-9]+\.[0-9]+\.[0-9]+)-beta\.[0-9]+/\1/')
       
       # Increment the version using the increment_version function
       NEW_VERSION=$(increment_version "$BASE_VERSION" "prerelease")
+      # Ensure the correct beta suffix is added after the increment
+      NEW_VERSION="${NEW_VERSION}-beta.0"
   else
       echo "No beta version found. Creating the first beta version."
       NEW_VERSION="${LATEST_STABLE_VERSION}-beta.0"
