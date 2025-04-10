@@ -193,10 +193,17 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
   cd "packages/$PKG_DIR"
 
   PACKAGE_NAME=$(jq -r .name package.json)
+  # Get the latest stable version
   LATEST_STABLE_VERSION=$(npm view $PACKAGE_NAME version || jq -r .version package.json)
 
-  # Check for the latest beta version
-  LATEST_BETA_VERSION=$(npm view $PACKAGE_NAME versions --json | jq -r '[.[] | select(contains("-beta"))] | max // empty')
+  # Fetch all versions and filter the ones that contain "-beta"
+  BETA_VERSIONS=$(npm view $PACKAGE_NAME versions --json | jq -r '[.[] | select(contains("-beta"))]')
+
+  # Print the filtered beta versions
+  echo "Filtered beta versions: $BETA_VERSIONS"
+
+  # If there are any beta versions, get the latest one
+  LATEST_BETA_VERSION=$(echo "$BETA_VERSIONS" | jq -r 'max // empty')
 
   echo "Latest stable version: $LATEST_STABLE_VERSION"
 
