@@ -199,7 +199,6 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
     echo "Latest stable version: $LATEST_STABLE_VERSION"
     echo "Latest beta version: $LATEST_BETA_VERSION"
 
-    # Check if LATEST_BETA_VERSION is not empty or "null"
     if [[ -n "$LATEST_BETA_VERSION" && "$LATEST_BETA_VERSION" != "null" ]]; then
         echo "Latest beta version: $LATEST_BETA_VERSION"
         BETA_NUMBER=$(echo "$LATEST_BETA_VERSION" | sed -E "s/.*-beta\.([0-9]+)$/\1/")
@@ -209,6 +208,9 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
         echo "No beta version found. Creating the first beta version."
         NEW_VERSION="${LATEST_STABLE_VERSION}-beta.0"
     fi
+  fi
+  else
+    NEW_VERSION=$(increment_version "$LATEST_STABLE_VERSION" "$VERSION_BUMP")
   fi
 
   echo "Bumping $PACKAGE_NAME to $NEW_VERSION"
