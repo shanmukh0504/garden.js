@@ -193,32 +193,46 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
   cd "packages/$PKG_DIR"
 
   PACKAGE_NAME=$(jq -r .name package.json)
-  # Extract the latest stable version (e.g., 4.23.4)
-  LATEST_STABLE_VERSION=$(npm view "$PACKAGE_NAME" version || jq -r .version package.json)
+  # Fetch all beta versions for the current package
+  BETA_VERSIONS=$(npm view $PACKAGE_NAME versions --json | jq -r '[.[] | select(contains("-beta"))]')
 
-  # Filter out beta versions that correspond to the same stable version
-  BETA_VERSIONS=$(npm view "$PACKAGE_NAME" versions --json | jq -r '[.[] | select(contains("-beta"))]')
+  # Filter the beta versions that correspond to the latest stable version
+  LATEST_STABLE_VERSION=$(npm view $PACKAGE_NAME version || jq -r .version package.json)
 
-  # Filter for beta versions that match the stable version (e.g., 4.23.4-beta.x)
-  MATCHING_BETA_VERSIONS=$(echo "$BETA_VERSIONS" | jq -r "map(select(test(\"^${LATEST_STABLE_VERSION//./\\\.}-beta\")))")
-
-  # If there are any matching beta versions, find the latest one
-  if [[ -n "$MATCHING_BETA_VERSIONS" ]]; then
-      LATEST_BETA_VERSION=$(echo "$MATCHING_BETA_VERSIONS" | jq -r 'max // empty')
-      
-      # Extract the beta number (e.g., from 4.23.4-beta.10, extract 10)
-      BETA_NUMBER=$(echo "$LATEST_BETA_VERSION" | sed -E "s/.*-beta\.([0-9]+)$/\1/")
-
-      # Increment the beta number
-      if [[ -n "$BETA_NUMBER" ]]; then
-          NEW_BETA_NUMBER=$((BETA_NUMBER + 1))
-          NEW_VERSION="${LATEST_STABLE_VERSION}-beta.${NEW_BETA_NUMBER}"
-      else
-          NEW_VERSION="${LATEST_STABLE_VERSION}-beta.0"
+  # Get only the beta versions that correspond to the stable version
+  STABLE_BETA_VERSIONS=()
+  for version in $(echo "$BETA_VERSIONS" | jq -r '.[]'); do
+      if [[ "$version" == "$LATEST_STABLE_VERSION"-beta* ]]; then
+          STABLE_BETA_VERSIONS+=("$version")
       fi
-  else
-      # No betas for this stable version yet, start with -beta.0
+  done
+
+  # Extract the beta numbers from the filtered versions
+  BETA_NUMBERS=()
+  for version in "${STABLE_BETA_VERSIONS[@]}"; do
+      BETA_NUMBER=$(echo "$version" | sed -E "s/.*-beta\.([0-9]+)$/\1/")
+      if [[ -n "$BETA_NUMBER" ]]; then
+          BETA_NUMBERS+=("$BETA_NUMBER")
+      fi
+  done
+
+  # If no beta versions are found, create the first beta version
+  if [[ ${#BETA_NUMBERS[@]} -eq 0 ]]; then
+      echo "No beta version found for $LATEST_STABLE_VERSION. Creating the first beta version."
       NEW_VERSION="${LATEST_STABLE_VERSION}-beta.0"
+  else
+      # Sort the beta versions numerically
+      IFS=$'\n' sorted=($(sort -n <<<"${BETA_NUMBERS[*]}"))
+      unset IFS
+
+      # The latest beta version number is the last item in the sorted array
+      LATEST_BETA_NUMBER=${sorted[-1]}
+
+      # Increment the latest beta number
+      NEW_BETA_NUMBER=$((LATEST_BETA_NUMBER + 1))
+
+      # Construct the new version
+      NEW_VERSION="${LATEST_STABLE_VERSION}-beta.${NEW_BETA_NUMBER}"
   fi
 
   echo "Bumping $PACKAGE_NAME to $NEW_VERSION"
