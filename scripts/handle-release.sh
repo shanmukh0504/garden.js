@@ -198,7 +198,7 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
 
     if [[ -n "$LATEST_BETA_VERSION" ]]; then
         echo "Latest beta version: $LATEST_BETA_VERSION"
-        BETA_NUMBER=$(echo "$LATEST_BETA_VERSION" | sed -E "s/.*-beta\.([0-9]+)$/\1/")
+        BETA_NUMBER=$(echo "$LATEST_BETA_VERSION" | sed -E "s/^$LATEST_STABLE_VERSION-beta\.([0-9]+)$/\1/")
 
         if [[ -n "$BETA_NUMBER" ]]; then
             NEW_BETA_NUMBER=$((BETA_NUMBER + 1))
