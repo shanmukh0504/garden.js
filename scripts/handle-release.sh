@@ -192,34 +192,21 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
   PACKAGE_NAME=$(jq -r .name package.json)
   LATEST_STABLE_VERSION=$(npm view $PACKAGE_NAME version || jq -r .version package.json)
   if [[ "$VERSION_BUMP" == "prerelease" ]]; then
-    BETA_VERSIONS=$(npm view $PACKAGE_NAME versions --json | jq -r '[.[] | select(contains("-beta"))]')
+    LATEST_BETA_VERSION=$(npm view $PACKAGE_NAME versions --json | jq -r '[.[] | select(contains("-beta"))] | last')
 
-    STABLE_BETA_VERSIONS=()
-    for version in $(echo "$BETA_VERSIONS" | jq -r '.[]'); do
-        if [[ "$version" == "$LATEST_STABLE_VERSION"-beta* ]]; then
-            STABLE_BETA_VERSIONS+=("$version")
-        fi
-    done
+    echo "Latest stable version: $LATEST_STABLE_VERSION"
 
-    BETA_NUMBERS=()
-    for version in "${STABLE_BETA_VERSIONS[@]}"; do
-        BETA_NUMBER=$(echo "$version" | sed -E "s/.*-beta\.([0-9]+)$/\1/")
+    if [[ -n "$LATEST_BETA_VERSION" ]]; then
+        echo "Latest beta version: $LATEST_BETA_VERSION"
+        BETA_NUMBER=$(echo "$LATEST_BETA_VERSION" | sed -E "s/.*-beta\.([0-9]+)$/\1/")
+
         if [[ -n "$BETA_NUMBER" ]]; then
-            BETA_NUMBERS+=("$BETA_NUMBER")
+            NEW_BETA_NUMBER=$((BETA_NUMBER + 1))
+            NEW_VERSION="${LATEST_STABLE_VERSION}-beta.${NEW_BETA_NUMBER}"
         fi
-    done
-
-    if [[ ${#BETA_NUMBERS[@]} -eq 0 ]]; then
-        echo "No beta version found for $LATEST_STABLE_VERSION. Creating the first beta version."
-        NEW_VERSION="${LATEST_STABLE_VERSION}-beta.0"
     else
-        IFS=$'\n' sorted=($(sort -n <<<"${BETA_NUMBERS[*]}"))
-        unset IFS
-        LATEST_BETA_NUMBER=${sorted[-1]}
-
-        NEW_BETA_NUMBER=$((LATEST_BETA_NUMBER + 1))
-
-        NEW_VERSION="${LATEST_STABLE_VERSION}-beta.${NEW_BETA_NUMBER}"
+        echo "No beta version found. Creating the first beta version."
+        NEW_VERSION="${LATEST_STABLE_VERSION}-beta.0"
     fi
   else
     NEW_VERSION=$(increment_version "$LATEST_STABLE_VERSION" "$VERSION_BUMP")
