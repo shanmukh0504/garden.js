@@ -144,10 +144,21 @@ done
 increment_version() {
   VERSION=$1
   VERSION_TYPE=$2
+
+  # Split version into MAJOR, MINOR, PATCH
   IFS='.' read -r -a VERSION_PARTS <<< "$VERSION"
   MAJOR=${VERSION_PARTS[0]}
   MINOR=${VERSION_PARTS[1]}
   PATCH=${VERSION_PARTS[2]}
+
+  # If we have a prerelease (e.g., beta), parse the beta part
+  if [[ "$VERSION" =~ -beta\.[0-9]+$ ]]; then
+    BETA_NUMBER=$(echo "$VERSION" | sed -E "s/.*-beta\.([0-9]+)$/\1/")
+    IS_BETA=true
+  else
+    BETA_NUMBER=0
+    IS_BETA=false
+  fi
 
   if [[ -z "$MAJOR" || -z "$MINOR" || -z "$PATCH" ]]; then
     echo "Invalid version number: $VERSION"
@@ -159,9 +170,11 @@ increment_version() {
     "minor") MINOR=$((MINOR + 1)); PATCH=0 ;;
     "patch") PATCH=$((PATCH + 1)) ;;
     "prerelease")
-      if [[ $VERSION =~ -beta\.[0-9]+$ ]]; then
-        PRERELEASE_NUM=$(( ${VERSION##*-beta.} + 1 ))
+      if [[ $IS_BETA == true ]]; then
+        # Increment the beta number
+        PRERELEASE_NUM=$((BETA_NUMBER + 1))
       else
+        # No beta number found, start with beta.0
         PRERELEASE_NUM=0
       fi
       PRERELEASE="beta.${PRERELEASE_NUM}"
@@ -170,11 +183,14 @@ increment_version() {
   esac
 
   if [[ $VERSION_TYPE == "prerelease" ]]; then
+    # Return version with beta if prerelease type
     echo "${MAJOR}.${MINOR}.${PATCH}-${PRERELEASE}"
   else
+    # Return regular version
     echo "${MAJOR}.${MINOR}.${PATCH}"
   fi
 }
+
 export -f increment_version
 
 if [[ "$IS_PR" == "true" && -n "$PR_BRANCH" ]]; then
@@ -193,33 +209,22 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
   cd "packages/$PKG_DIR"
 
   PACKAGE_NAME=$(jq -r .name package.json)
-  # Get the latest stable version
   LATEST_STABLE_VERSION=$(npm view $PACKAGE_NAME version || jq -r .version package.json)
 
-  # Fetch all versions and filter the ones that contain "-beta"
   BETA_VERSIONS=$(npm view $PACKAGE_NAME versions --json | jq -r '[.[] | select(contains("-beta"))]')
-
-  # Print the filtered beta versions
+  
   echo "Filtered beta versions: $BETA_VERSIONS"
 
-  # Sort beta versions numerically and get the latest one
-  LATEST_BETA_VERSION=$(echo "$BETA_VERSIONS" | sort -t. -k3,3n -k4,4n | tail -n 1)
-
-  echo "Latest stable version: $LATEST_STABLE_VERSION"
-  echo "Latest beta version: $LATEST_BETA_VERSION"
-
-  # If a beta version exists, pass it to increment_version
-  if [[ -n "$LATEST_BETA_VERSION" ]]; then
-      # Extract the base version (without the -beta part)
-      BASE_VERSION=$(echo "$LATEST_BETA_VERSION" | sed -E 's/([0-9]+\.[0-9]+\.[0-9]+)-beta\.[0-9]+/\1/')
-      
-      # Increment the version using the increment_version function
-      NEW_VERSION=$(increment_version "$BASE_VERSION" "prerelease")
-      # Ensure the correct beta suffix is added after the increment
-      NEW_VERSION="${NEW_VERSION}-beta.0"
+  # If beta versions are found, get the latest one
+  if [[ -n "$BETA_VERSIONS" ]]; then
+      LATEST_BETA_VERSION=$(echo "$BETA_VERSIONS" | sort -t. -k3,3n -k4,4n | tail -n 1)  # Sort beta versions and get the latest one
+      echo "Latest beta version: $LATEST_BETA_VERSION"
+      # Use the increment_version function to generate the new version
+      NEW_VERSION=$(increment_version "$LATEST_BETA_VERSION" "prerelease")
   else
       echo "No beta version found. Creating the first beta version."
-      NEW_VERSION="${LATEST_STABLE_VERSION}-beta.0"
+      # Use the increment_version function to generate the first beta version
+      NEW_VERSION=$(increment_version "$LATEST_STABLE_VERSION" "prerelease")
   fi
 
   echo "Bumping $PACKAGE_NAME to $NEW_VERSION"
