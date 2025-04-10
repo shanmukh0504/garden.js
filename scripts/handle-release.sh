@@ -14,13 +14,10 @@ fi
 
 if [[ $1 == "beta" ]]; then
   VERSION_BUMP="prerelease"
-  PRERELEASE_SUFFIX="beta"
 else
   LAST_COMMIT_MSG=$(git log -1 --pretty=%B)
 
-  if [[ $LAST_COMMIT_MSG == patch:* ]]; then
-    VERSION_BUMP="patch"
-  elif [[ $LAST_COMMIT_MSG == chore:* ]]; then
+  if [[ $LAST_COMMIT_MSG == patch:* || $LAST_COMMIT_MSG == chore:* ]]; then
     VERSION_BUMP="patch"
   elif [[ $LAST_COMMIT_MSG == fix:* ]]; then
     VERSION_BUMP="minor"
@@ -37,46 +34,27 @@ echo "Version bump type detected: $VERSION_BUMP"
 if [[ "$IS_PR" == "true" && -n "$PR_BRANCH" ]]; then
   git fetch origin "$PR_BRANCH:$PR_BRANCH"
   RAW_CHANGED=$(git diff --name-only origin/main..."$PR_BRANCH" | grep '^packages/' | awk -F/ '{print $2}' | sort -u)
-
-  CHANGED=""
-  for DIR in $RAW_CHANGED; do
-    PKG_JSON="packages/$DIR/package.json"
-    if [[ -f "$PKG_JSON" ]]; then
-      PKG_NAME=$(jq -r .name "$PKG_JSON")
-      if [[ "$PKG_NAME" != "null" && -n "$PKG_NAME" ]]; then
-        CHANGED+="$PKG_NAME"$'\n'
-      fi
-    fi
-  done
-
-  CHANGED=$(echo "$CHANGED" | sort -u)
-
-elif [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
+else
   if git describe --tags --abbrev=0 >/dev/null 2>&1; then
     LATEST_TAG=$(git describe --tags --abbrev=0)
-    echo "Latest tag found: $LATEST_TAG"
     RAW_CHANGED=$(git diff --name-only "$LATEST_TAG"...HEAD | grep '^packages/' | awk -F/ '{print $2}' | sort -u)
   else
-    echo "No tags found. Falling back to HEAD~1."
     RAW_CHANGED=$(git diff --name-only HEAD~1 | grep '^packages/' | awk -F/ '{print $2}' | sort -u)
   fi
-
-  CHANGED=""
-  for DIR in $RAW_CHANGED; do
-    PKG_JSON="packages/$DIR/package.json"
-    if [[ -f "$PKG_JSON" ]]; then
-      PKG_NAME=$(jq -r .name "$PKG_JSON")
-      if [[ "$PKG_NAME" != "null" && -n "$PKG_NAME" ]]; then
-        CHANGED+="$PKG_NAME"$'\n'
-      fi
-    fi
-  done
-
-  CHANGED=$(echo "$CHANGED" | sort -u)
 fi
 
-echo "Changed packages:"
-echo "$CHANGED"
+CHANGED=""
+for DIR in $RAW_CHANGED; do
+  PKG_JSON="packages/$DIR/package.json"
+  if [[ -f "$PKG_JSON" ]]; then
+    PKG_NAME=$(jq -r .name "$PKG_JSON")
+    if [[ "$PKG_NAME" != "null" && -n "$PKG_NAME" ]]; then
+      CHANGED+="$PKG_NAME"$'\n'
+    fi
+  fi
+done
+
+CHANGED=$(echo "$CHANGED" | sort -u)
 
 if [[ -z "$CHANGED" ]]; then
   echo "No packages changed. Skipping publish."
@@ -86,7 +64,6 @@ fi
 TOPO_ORDER=$(yarn workspaces foreach --all --topological --no-private exec node -p "require('./package.json').name" 2>/dev/null | grep '^@' | sed 's/\[//;s/\]://')
 
 declare -A PKG_NAME_TO_DIR
-
 for DIR in packages/*; do
   if [[ -f "$DIR/package.json" ]]; then
     NAME=$(jq -r .name "$DIR/package.json")
@@ -118,9 +95,8 @@ done
 declare -A SHOULD_PUBLISH
 queue=()
 for CHG in $CHANGED; do
-  CHG_PKG="$CHG"
-  SHOULD_PUBLISH[$CHG_PKG]=1
-  queue+=("$CHG_PKG")
+  SHOULD_PUBLISH[$CHG]=1
+  queue+=("$CHG")
 done
 
 while [ ${#queue[@]} -gt 0 ]; do
@@ -141,42 +117,6 @@ for PKG in $TOPO_ORDER; do
   fi
 done
 
-increment_version() {
-  VERSION=$1
-  VERSION_TYPE=$2
-  IFS='.' read -r -a VERSION_PARTS <<< "$VERSION"
-  MAJOR=${VERSION_PARTS[0]}
-  MINOR=${VERSION_PARTS[1]}
-  PATCH=${VERSION_PARTS[2]}
-
-  if [[ -z "$MAJOR" || -z "$MINOR" || -z "$PATCH" ]]; then
-    echo "Invalid version number: $VERSION"
-    exit 1
-  fi
-
-  case $VERSION_TYPE in
-    "major") MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
-    "minor") MINOR=$((MINOR + 1)); PATCH=0 ;;
-    "patch") PATCH=$((PATCH + 1)) ;;
-    "prerelease")
-      if [[ $VERSION =~ -beta\.[0-9]+$ ]]; then
-        PRERELEASE_NUM=$(( ${VERSION##*-beta.} + 1 ))
-      else
-        PRERELEASE_NUM=0
-      fi
-      PRERELEASE="beta.${PRERELEASE_NUM}"
-      ;;
-    *) echo "Invalid version bump type: $VERSION_TYPE"; exit 1 ;;
-  esac
-
-  if [[ $VERSION_TYPE == "prerelease" ]]; then
-    echo "${MAJOR}.${MINOR}.${PATCH}-${PRERELEASE}"
-  else
-    echo "${MAJOR}.${MINOR}.${PATCH}"
-  fi
-}
-export -f increment_version
-
 if [[ "$IS_PR" == "true" && -n "$PR_BRANCH" ]]; then
   git checkout $PR_BRANCH
 else
@@ -193,68 +133,20 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
   cd "packages/$PKG_DIR"
 
   PACKAGE_NAME=$(jq -r .name package.json)
-  # Fetch all beta versions for the current package
-  BETA_VERSIONS=$(npm view $PACKAGE_NAME versions --json | jq -r '[.[] | select(contains("-beta"))]')
-  echo "Beta versions: $BETA_VERSIONS"
-  # Filter the beta versions that correspond to the latest stable version
   LATEST_STABLE_VERSION=$(npm view $PACKAGE_NAME version || jq -r .version package.json)
 
-  # Get only the beta versions that correspond to the stable version
-  STABLE_BETA_VERSIONS=()
-  for version in $(echo "$BETA_VERSIONS" | jq -r '.[]'); do
-      if [[ "$version" == "$LATEST_STABLE_VERSION"-beta* ]]; then
-          STABLE_BETA_VERSIONS+=("$version")
-      fi
-  done
-
-  echo "Stable beta versions: ${STABLE_BETA_VERSIONS[@]}"
-  # Extract the beta numbers from the filtered versions
-  BETA_NUMBERS=()
-  for version in "${STABLE_BETA_VERSIONS[@]}"; do
-      BETA_NUMBER=$(echo "$version" | sed -E "s/.*-beta\.([0-9]+)$/\1/")
-      if [[ -n "$BETA_NUMBER" ]]; then
-          BETA_NUMBERS+=("$BETA_NUMBER")
-      fi
-  done
-
-  echo "Beta numbers: ${BETA_NUMBERS[@]}"
-  # If no beta versions are found, create the first beta version
-  if [[ ${#BETA_NUMBERS[@]} -eq 0 ]]; then
-      echo "No beta version found for $LATEST_STABLE_VERSION. Creating the first beta version."
-      NEW_VERSION="${LATEST_STABLE_VERSION}-beta.0"
-  else
-      # Sort the beta versions numerically
-      IFS=$'\n' sorted=($(sort -n <<<"${BETA_NUMBERS[*]}"))
-      unset IFS
-
-      echo "Sorted beta numbers: ${sorted[@]}"
-      # The latest beta version number is the last item in the sorted array
-      LATEST_BETA_NUMBER=${sorted[-1]}
-
-      # Increment the latest beta number
-      NEW_BETA_NUMBER=$((LATEST_BETA_NUMBER + 1))
-
-      # Construct the new version
-      NEW_VERSION="${LATEST_STABLE_VERSION}-beta.${NEW_BETA_NUMBER}"
-  fi
-
-  echo "Bumping $PACKAGE_NAME to $NEW_VERSION"
-  jq --arg new_version "$NEW_VERSION" '.version = $new_version' package.json > package.tmp.json && mv package.tmp.json package.json
-
   if [[ "$VERSION_BUMP" == "prerelease" ]]; then
+    NEW_VERSION="${LATEST_STABLE_VERSION}-beta.0"
     yarn npm publish --tag beta --access public
   else
-    if [[ "$IS_PR" != "true" ]]; then
-      git add package.json
-      git -c user.email="$COMMIT_EMAIL" \
-          -c user.name="$COMMIT_NAME" \
-          commit -m "V$NEW_VERSION"
-      yarn npm publish --access public
-      git tag "$PACKAGE_NAME@$NEW_VERSION"
-      git push https://x-access-token:${GH_PAT}@github.com/shanmukh0504/garden.js.git HEAD:main --tags
-    else
-      echo "Skipping commit for PR."
-    fi
+    NEW_VERSION=$(increment_version "$LATEST_STABLE_VERSION" "$VERSION_BUMP")
+    git add package.json
+    git -c user.email="$COMMIT_EMAIL" \
+        -c user.name="$COMMIT_NAME" \
+        commit -m "V$NEW_VERSION"
+    yarn npm publish --access public
+    git tag "$PACKAGE_NAME@$NEW_VERSION"
+    git push https://x-access-token:${GH_PAT}@github.com/shanmukh0504/garden.js.git HEAD:main --tags
   fi
 
   cd - > /dev/null
