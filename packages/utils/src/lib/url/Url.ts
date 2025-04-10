@@ -35,3 +35,4 @@ export class Url extends URL {
     return new Url(`${this.pathname}?${url.toString()}`, this);
   }
 }
+
