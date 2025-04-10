@@ -200,7 +200,7 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
   BETA_VERSIONS=$(npm view "$PACKAGE_NAME" versions --json | jq -r '[.[] | select(contains("-beta"))]')
 
   # Filter for beta versions that match the stable version (e.g., 4.23.4-beta.x)
-  MATCHING_BETA_VERSIONS=$(echo "$BETA_VERSIONS" | jq -r 'map(select(test("^'${LATEST_STABLE_VERSION//./\\\.}'-beta")))')
+  MATCHING_BETA_VERSIONS=$(echo "$BETA_VERSIONS" | jq -r "map(select(test(\"^${LATEST_STABLE_VERSION//./\\\.}-beta\")))")
 
   # If there are any matching beta versions, find the latest one
   if [[ -n "$MATCHING_BETA_VERSIONS" ]]; then
