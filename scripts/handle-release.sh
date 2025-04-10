@@ -195,7 +195,7 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
   PACKAGE_NAME=$(jq -r .name package.json)
   # Fetch all beta versions for the current package
   BETA_VERSIONS=$(npm view $PACKAGE_NAME versions --json | jq -r '[.[] | select(contains("-beta"))]')
-
+  echo "Beta versions: $BETA_VERSIONS"
   # Filter the beta versions that correspond to the latest stable version
   LATEST_STABLE_VERSION=$(npm view $PACKAGE_NAME version || jq -r .version package.json)
 
@@ -207,6 +207,7 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
       fi
   done
 
+  echo "Stable beta versions: ${STABLE_BETA_VERSIONS[@]}"
   # Extract the beta numbers from the filtered versions
   BETA_NUMBERS=()
   for version in "${STABLE_BETA_VERSIONS[@]}"; do
@@ -216,6 +217,7 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
       fi
   done
 
+  echo "Beta numbers: ${BETA_NUMBERS[@]}"
   # If no beta versions are found, create the first beta version
   if [[ ${#BETA_NUMBERS[@]} -eq 0 ]]; then
       echo "No beta version found for $LATEST_STABLE_VERSION. Creating the first beta version."
@@ -225,6 +227,7 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
       IFS=$'\n' sorted=($(sort -n <<<"${BETA_NUMBERS[*]}"))
       unset IFS
 
+      echo "Sorted beta numbers: ${sorted[@]}"
       # The latest beta version number is the last item in the sorted array
       LATEST_BETA_NUMBER=${sorted[-1]}
 
