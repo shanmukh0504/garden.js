@@ -193,20 +193,23 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
   cd "packages/$PKG_DIR"
 
   PACKAGE_NAME=$(jq -r .name package.json)
-  LATEST_STABLE_VERSION=$(npm view $PACKAGE_NAME version || jq -r .version package.json)
+  # Extract the latest stable version (e.g., 4.23.4)
+  LATEST_STABLE_VERSION=$(npm view "$PACKAGE_NAME" version || jq -r .version package.json)
 
-  BETA_VERSIONS=$(npm view $PACKAGE_NAME versions --json | jq -r '[.[] | select(contains("-beta"))]')
+  # Filter out beta versions that correspond to the same stable version
+  BETA_VERSIONS=$(npm view "$PACKAGE_NAME" versions --json | jq -r '[.[] | select(contains("-beta"))]')
 
-  echo "Filtered beta versions: $BETA_VERSIONS"
+  # Filter for beta versions that match the stable version (e.g., 4.23.4-beta.x)
+  MATCHING_BETA_VERSIONS=$(echo "$BETA_VERSIONS" | jq -r 'map(select(test("^'${LATEST_STABLE_VERSION//./\\\.}'-beta")))')
 
-  LATEST_BETA_VERSION=$(echo "$BETA_VERSIONS" | jq -r 'max // empty')
-
-  echo "Latest stable version: $LATEST_STABLE_VERSION"
-
-  if [[ -n "$LATEST_BETA_VERSION" ]]; then
-      echo "Latest beta version: $LATEST_BETA_VERSION"
-      BETA_NUMBER=$(echo "$LATEST_BETA_VERSION" | sed -E "s/.*-beta\.([0-9]+)$/\1/")
+  # If there are any matching beta versions, find the latest one
+  if [[ -n "$MATCHING_BETA_VERSIONS" ]]; then
+      LATEST_BETA_VERSION=$(echo "$MATCHING_BETA_VERSIONS" | jq -r 'max // empty')
       
+      # Extract the beta number (e.g., from 4.23.4-beta.10, extract 10)
+      BETA_NUMBER=$(echo "$LATEST_BETA_VERSION" | sed -E "s/.*-beta\.([0-9]+)$/\1/")
+
+      # Increment the beta number
       if [[ -n "$BETA_NUMBER" ]]; then
           NEW_BETA_NUMBER=$((BETA_NUMBER + 1))
           NEW_VERSION="${LATEST_STABLE_VERSION}-beta.${NEW_BETA_NUMBER}"
@@ -214,7 +217,7 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
           NEW_VERSION="${LATEST_STABLE_VERSION}-beta.0"
       fi
   else
-      echo "No beta version found. Creating the first beta version."
+      # No betas for this stable version yet, start with -beta.0
       NEW_VERSION="${LATEST_STABLE_VERSION}-beta.0"
   fi
 
