@@ -54,10 +54,8 @@ if [[ "$IS_PR" == "true" && -n "$PR_BRANCH" ]]; then
 elif [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
   if git describe --tags --abbrev=0 >/dev/null 2>&1; then
     LATEST_TAG=$(git describe --tags --abbrev=0)
-    echo "Latest tag found: $LATEST_TAG"
     RAW_CHANGED=$(git diff --name-only "$LATEST_TAG"...HEAD | grep '^packages/' | awk -F/ '{print $2}' | sort -u)
   else
-    echo "No tags found. Falling back to HEAD~1."
     RAW_CHANGED=$(git diff --name-only HEAD~1 | grep '^packages/' | awk -F/ '{print $2}' | sort -u)
   fi
 
@@ -86,7 +84,6 @@ fi
 TOPO_ORDER=$(yarn workspaces foreach --all --topological --no-private exec node -p "require('./package.json').name" 2>/dev/null | grep '^@' | sed 's/\[//;s/\]://')
 
 declare -A PKG_NAME_TO_DIR
-
 for DIR in packages/*; do
   if [[ -f "$DIR/package.json" ]]; then
     NAME=$(jq -r .name "$DIR/package.json")
@@ -101,7 +98,7 @@ declare -A REVERSE_DEP_MAP
 for PKG in $TOPO_ORDER; do
   PKG_DIR="${PKG_NAME_TO_DIR[$PKG]}"
   if [[ -z "$PKG_DIR" ]]; then
-    echo "⚠️ Skipping $PKG: Directory not found in PKG_NAME_TO_DIR"
+    echo "⚠ Skipping $PKG: Directory not found in PKG_NAME_TO_DIR"
     continue
   fi
 
@@ -193,23 +190,39 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
   cd "packages/$PKG_DIR"
 
   PACKAGE_NAME=$(jq -r .name package.json)
-
   LATEST_STABLE_VERSION=$(npm view $PACKAGE_NAME version || jq -r .version package.json)
+  if [[ "$VERSION_BUMP" == "prerelease" ]]; then
+    BETA_VERSIONS=$(npm view $PACKAGE_NAME versions --json | jq -r '[.[] | select(contains("-beta"))]')
 
-  BETA_VERSIONS=$(npm view $PACKAGE_NAME versions --json | jq -r '[.[] | select(contains("-beta"))]')
+    STABLE_BETA_VERSIONS=()
+    for version in $(echo "$BETA_VERSIONS" | jq -r '.[]'); do
+        if [[ "$version" == "$LATEST_STABLE_VERSION"-beta* ]]; then
+            STABLE_BETA_VERSIONS+=("$version")
+        fi
+    done
 
-  echo "Filtered beta versions: $BETA_VERSIONS"
+    BETA_NUMBERS=()
+    for version in "${STABLE_BETA_VERSIONS[@]}"; do
+        BETA_NUMBER=$(echo "$version" | sed -E "s/.*-beta\.([0-9]+)$/\1/")
+        if [[ -n "$BETA_NUMBER" ]]; then
+            BETA_NUMBERS+=("$BETA_NUMBER")
+        fi
+    done
 
-  LATEST_BETA_VERSION=$(echo "$BETA_VERSIONS" | sort -t. -k3,3n -k4,4n | tail -n 1)
+    if [[ ${#BETA_NUMBERS[@]} -eq 0 ]]; then
+        echo "No beta version found for $LATEST_STABLE_VERSION. Creating the first beta version."
+        NEW_VERSION="${LATEST_STABLE_VERSION}-beta.0"
+    else
+        IFS=$'\n' sorted=($(sort -n <<<"${BETA_NUMBERS[*]}"))
+        unset IFS
+        LATEST_BETA_NUMBER=${sorted[-1]}
 
-  echo "Latest stable version: $LATEST_STABLE_VERSION"
-  echo "Latest beta version: $LATEST_BETA_VERSION"
+        NEW_BETA_NUMBER=$((LATEST_BETA_NUMBER + 1))
 
-  if [[ -n "$LATEST_BETA_VERSION" ]]; then
-      NEW_VERSION=$(increment_version "$LATEST_BETA_VERSION" "prerelease")
+        NEW_VERSION="${LATEST_STABLE_VERSION}-beta.${NEW_BETA_NUMBER}"
+    fi
   else
-      echo "No beta version found. Creating the first beta version."
-      NEW_VERSION="${LATEST_STABLE_VERSION}-beta.0"
+    NEW_VERSION=$(increment_version "$LATEST_STABLE_VERSION" "$VERSION_BUMP")
   fi
 
   echo "Bumping $PACKAGE_NAME to $NEW_VERSION"
