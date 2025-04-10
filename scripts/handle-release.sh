@@ -193,33 +193,20 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
   cd "packages/$PKG_DIR"
 
   PACKAGE_NAME=$(jq -r .name package.json)
-  # Get the latest stable version
+
   LATEST_STABLE_VERSION=$(npm view $PACKAGE_NAME version || jq -r .version package.json)
 
-  # Fetch all versions and filter the ones that contain "-beta"
   BETA_VERSIONS=$(npm view $PACKAGE_NAME versions --json | jq -r '[.[] | select(contains("-beta"))]')
 
-  # Print the filtered beta versions
   echo "Filtered beta versions: $BETA_VERSIONS"
 
-  # If there are any beta versions, get the latest one
-  LATEST_BETA_VERSION=$(echo "$BETA_VERSIONS" | jq -r 'max // empty')
+  LATEST_BETA_VERSION=$(echo "$BETA_VERSIONS" | sort -t. -k3,3n -k4,4n | tail -n 1)
 
   echo "Latest stable version: $LATEST_STABLE_VERSION"
+  echo "Latest beta version: $LATEST_BETA_VERSION"
 
   if [[ -n "$LATEST_BETA_VERSION" ]]; then
-      echo "Latest beta version: $LATEST_BETA_VERSION"
-      # Extract the numeric beta number using a more robust regex
-      BETA_NUMBER=$(echo "$LATEST_BETA_VERSION" | sed -E "s/.*-beta\.([0-9]+)$/\1/")
-      
-      # If BETA_NUMBER is found, increment it
-      if [[ -n "$BETA_NUMBER" ]]; then
-          NEW_BETA_NUMBER=$((BETA_NUMBER + 1))
-          NEW_VERSION="${LATEST_STABLE_VERSION}-beta.${NEW_BETA_NUMBER}"
-      else
-          # If no beta number was found (which shouldn't really happen here), create the first beta version.
-          NEW_VERSION="${LATEST_STABLE_VERSION}-beta.0"
-      fi
+      NEW_VERSION=$(increment_version "$LATEST_BETA_VERSION" "prerelease")
   else
       echo "No beta version found. Creating the first beta version."
       NEW_VERSION="${LATEST_STABLE_VERSION}-beta.0"
