@@ -208,7 +208,6 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
         echo "No beta version found. Creating the first beta version."
         NEW_VERSION="${LATEST_STABLE_VERSION}-beta.0"
     fi
-  fi
   else
     NEW_VERSION=$(increment_version "$LATEST_STABLE_VERSION" "$VERSION_BUMP")
   fi
