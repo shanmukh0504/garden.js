@@ -211,13 +211,14 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
   PACKAGE_NAME=$(jq -r .name package.json)
   LATEST_STABLE_VERSION=$(npm view $PACKAGE_NAME version || jq -r .version package.json)
 
+  # Fetch all beta versions
   BETA_VERSIONS=$(npm view $PACKAGE_NAME versions --json | jq -r '[.[] | select(contains("-beta"))]')
   
   echo "Filtered beta versions: $BETA_VERSIONS"
 
-  # If beta versions are found, get the latest one
+  # Sort beta versions numerically and get the latest one
   if [[ -n "$BETA_VERSIONS" ]]; then
-      LATEST_BETA_VERSION=$(echo "$BETA_VERSIONS" | sort -t. -k3,3n -k4,4n | tail -n 1)  # Sort beta versions and get the latest one
+      LATEST_BETA_VERSION=$(echo "$BETA_VERSIONS" | sort -t. -k3,3n -k4,4n | tail -n 1)
       echo "Latest beta version: $LATEST_BETA_VERSION"
       # Use the increment_version function to generate the new version
       NEW_VERSION=$(increment_version "$LATEST_BETA_VERSION" "prerelease")
