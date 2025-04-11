@@ -8,3 +8,5 @@ export type APIResponse<T> = {
   result?: T;
   error?: string;
 };
+
+
