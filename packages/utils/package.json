@@ -37,6 +37,7 @@
   "dependencies": {
     "@simplewebauthn/browser": "^13.1.0",
     "jwt-decode": "^4.0.0",
+    "node-cache": "^5.1.2",
     "viem": "^2.21.23"
   }
 }
