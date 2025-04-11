@@ -60,6 +60,9 @@ jobs:
           corepack enable
           corepack prepare yarn@4.5.1 --activate
 
+      - name: Install Dependencies
+        run: yarn install
+
       - name: Make handle-release.sh Executable
         run: chmod +x scripts/handle-release.sh
 
@@ -104,6 +107,9 @@ jobs:
         run: |
           corepack enable
           corepack prepare yarn@4.5.1 --activate
+
+      - name: Install Dependencies
+        run: yarn install
 
       - name: Make handle-release.sh Executable
         run: chmod +x scripts/handle-release.sh
