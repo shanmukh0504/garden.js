@@ -180,8 +180,6 @@ if [[ "$IS_PR" == "true" && -n "$PR_BRANCH" ]]; then
 else
   git checkout main
 fi
-
-yarn install
 yarn workspaces foreach --all --topological --no-private run build
 
 echo "Publishing in order: ${PUBLISH_ORDER[@]}"
