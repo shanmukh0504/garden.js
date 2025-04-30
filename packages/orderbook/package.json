@@ -41,5 +41,6 @@
     "vite-plugin-dts": "^3.7.3",
     "vitest": "^1.6.0"
   },
+  
   "sideEffects": false
 }
