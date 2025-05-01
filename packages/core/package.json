@@ -37,6 +37,7 @@
     "varuint-bitcoin": "^1.1.2",
     "viem": "^2.21.23"
   },
+  
   "devDependencies": {
     "dotenv": "^16.3.1",
     "typescript": "^5.2.2",
