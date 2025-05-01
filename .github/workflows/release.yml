@@ -83,6 +83,65 @@ jobs:
           PR_REPO: ${{ env.PR_REPO }}
         run: ./scripts/handle-release.sh beta
 
+  individual-beta-release:
+    if: github.event_name == 'issue_comment' && startsWith(github.event.comment.body, '/release-beta')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      issues: read
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Get Commenter's Username
+        id: get-commenter
+        run: echo "COMMENTER=${{ github.event.comment.user.login }}"
+
+      - name: Fetch Commenter's Permissions
+        id: get-permission
+        run: |
+          COMMENTER=${{ github.event.comment.user.login }}
+          RESPONSE=$(curl -s -H "Authorization: token ${{ secrets.GH_PAT }}" \
+            "https://api.github.com/repos/${{ github.repository }}/collaborators/${COMMENTER}/permission")
+          
+          PERMISSION=$(echo "$RESPONSE" | jq -r '.permission')
+          echo "Commenter's permission level: $PERMISSION"
+
+          if [[ "$PERMISSION" == "admin" || "$PERMISSION" == "maintain" ]]; then
+            echo "is_admin_or_maintain=true"
+          else
+            echo "is_admin_or_maintain=false"
+            exit 1
+          fi
+
+      - name: Extract Package Names
+        id: extract-packages
+        run: |
+          COMMENT_BODY="${{ github.event.comment.body }}"
+          # Extract package names from the comment, ignoring the "/release-beta" part
+          PACKAGE_NAMES=$(echo "$COMMENT_BODY" | sed 's/\/release-beta //')
+          echo "PACKAGE_NAMES=$PACKAGE_NAMES" >> $GITHUB_ENV
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.9.0
+
+      - name: Enable Corepack and Set Yarn Version
+        run: |
+          corepack enable
+          corepack prepare yarn@4.5.1 --activate
+
+      - name: Install Dependencies
+        run: yarn install
+
+      - name: Run Beta Release Script
+        run: ./scripts/handle-beta-release.sh ${{ env.PACKAGE_NAMES }}
   release:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main' && (contains(github.event.head_commit.message, 'patch') || contains(github.event.head_commit.message, 'chore') || contains(github.event.head_commit.message, 'fix') || contains(github.event.head_commit.message, 'feat'))
     runs-on: ubuntu-latest
