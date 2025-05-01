@@ -140,6 +140,19 @@ jobs:
       - name: Install Dependencies
         run: yarn install
 
+      - name: Make handle-beta-release.sh Executable
+        run: chmod +x scripts/handle-beta-release.sh
+
+      - name: Extract PR Info (for PR comments)
+        if: github.event.issue.pull_request != null
+        run: |
+          PR_URL="${{ github.event.issue.pull_request.url }}"
+          PR_DATA=$(curl -s -H "Authorization: token ${{ secrets.GH_PAT }}" "$PR_URL")
+
+          echo "$PR_DATA" > pr.json
+          echo "PR_BRANCH=$(jq -r '.head.ref' pr.json)" >> $GITHUB_ENV
+          echo "PR_REPO=$(jq -r '.head.repo.full_name' pr.json)" >> $GITHUB_ENV
+        
       - name: Run Beta Release Script
         run: ./scripts/handle-beta-release.sh ${{ env.PACKAGE_NAMES }}
   release:
