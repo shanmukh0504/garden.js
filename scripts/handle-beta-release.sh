@@ -19,6 +19,9 @@ increment_beta_version() {
   BETA_PATTERN="${LATEST_STABLE_VERSION}-beta."
   LATEST_BETA_VERSION=$(npm view $PACKAGE_NAME versions --json | jq -r '[.[] | select(contains("'"$BETA_PATTERN"'"))] | last')
 
+    echo "Latest stable version: $LATEST_STABLE_VERSION"
+    echo "Latest beta version: $LATEST_BETA_VERSION"
+
   if [[ -n "$LATEST_BETA_VERSION" && "$LATEST_BETA_VERSION" != "null" ]]; then
       BETA_NUMBER=$(echo "$LATEST_BETA_VERSION" | sed -E "s/.*-beta\.([0-9]+)$/\1/")
       NEW_BETA_NUMBER=$((BETA_NUMBER + 1))
