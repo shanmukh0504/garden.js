@@ -14,11 +14,35 @@ env:
   NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
 jobs:
+  decide-job:
+    runs-on: ubuntu-latest
+    outputs:
+      run_beta_release: ${{ steps.set.outputs.run_beta_release }}
+      run_individual_beta: ${{ steps.set.outputs.run_individual_beta }}
+      run_main_release: ${{ steps.set.outputs.run_main_release }}
+    steps:
+      - name: Decide which job to run
+        id: set
+        run: |
+          EVENT_NAME="${{ github.event_name }}"
+          COMMENT_BODY="${{ github.event.comment.body || '' }}"
+          BRANCH="${{ github.ref }}"
+          COMMIT_MSG="${{ github.event.head_commit.message || '' }}"
+
+          echo "run_beta_release=false" >> $GITHUB_OUTPUT
+          echo "run_individual_beta=false" >> $GITHUB_OUTPUT
+          echo "run_main_release=false" >> $GITHUB_OUTPUT
+
+          if [[ "$EVENT_NAME" == "issue_comment" && "$COMMENT_BODY" == "/release-beta" ]]; then
+            echo "run_beta_release=true" >> $GITHUB_OUTPUT
+          elif [[ "$EVENT_NAME" == "issue_comment" && "$COMMENT_BODY" == /release-beta* ]]; then
+            echo "run_individual_beta=true" >> $GITHUB_OUTPUT
+          elif [[ "$EVENT_NAME" == "push" && "$BRANCH" == "refs/heads/main" && "$COMMIT_MSG" =~ (patch|chore|fix|feat) ]]; then
+            echo "run_main_release=true" >> $GITHUB_OUTPUT
+          fi
   beta-release:
-    concurrency:
-      group: monorepo-release
-      cancel-in-progress: false
-    if: github.event_name == 'issue_comment' && github.event.comment.body == '/release-beta'
+    needs: decide-job
+    if: needs.decide-job.outputs.run_beta_release == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -87,10 +111,8 @@ jobs:
         run: ./scripts/handle-release.sh beta
 
   individual-beta-release:
-    concurrency:
-      group: monorepo-release
-      cancel-in-progress: false
-    if: github.event_name == 'issue_comment' && startsWith(github.event.comment.body, '/release-beta')
+    needs: decide-job
+    if: needs.decide-job.outputs.run_individual_beta == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -162,10 +184,8 @@ jobs:
       - name: Run Beta Release Script
         run: ./scripts/handle-beta-release.sh ${{ env.PACKAGE_NAMES }}
   release:
-    concurrency:
-      group: monorepo-release
-      cancel-in-progress: false
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && (contains(github.event.head_commit.message, 'patch') || contains(github.event.head_commit.message, 'chore') || contains(github.event.head_commit.message, 'fix') || contains(github.event.head_commit.message, 'feat'))
+    needs: decide-job
+    if: needs.decide-job.outputs.run_main_release == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: write
