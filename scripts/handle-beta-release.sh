@@ -39,7 +39,9 @@ increment_beta_version() {
 for PACKAGE in "${PACKAGE_NAMES[@]}"; do
   echo "📦 Processing package: $PACKAGE"
   
-  PKG_DIR="packages/$PACKAGE"
+  PKG_NAME_NO_SCOPE=$(basename "$PACKAGE")
+  PKG_DIR="packages/$PKG_NAME_NO_SCOPE"
+  
   if [[ ! -d "$PKG_DIR" ]]; then
     echo "Package directory $PKG_DIR not found. Skipping."
     continue
