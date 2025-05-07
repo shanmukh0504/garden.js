@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+COMMIT_EMAIL=$(git log -1 --pretty=format:'%ae')
+COMMIT_NAME=$(git log -1 --pretty=format:'%an')
+
 if [[ -z "$1" ]]; then
   echo "No package names provided."
   exit 1
