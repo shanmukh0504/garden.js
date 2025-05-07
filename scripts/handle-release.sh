@@ -174,12 +174,13 @@ increment_version() {
 }
 export -f increment_version
 
-ROOT_VERSION=$(jq -r .version package.json)
 if [[ "$IS_PR" == "true" && -n "$PR_BRANCH" ]]; then
   git checkout $PR_BRANCH
 else
   git checkout main
 fi
+
+ROOT_VERSION=$(jq -r .version package.json)
 
 yarn install
 yarn workspaces foreach --all --topological --no-private run build
