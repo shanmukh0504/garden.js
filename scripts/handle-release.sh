@@ -249,3 +249,11 @@ if [[ "$IS_PR" != "true" && -n $(git status --porcelain) ]]; then
       commit -m "commit release script and config changes"
   git push https://x-access-token:${GH_PAT}@github.com/shanmukh0504/garden.js.git HEAD:main
 fi
+
+if [[ "$IS_PR" == "true" && -n "$PR_BRANCH" ]]; then
+  git add .
+  git -c user.email="$COMMIT_EMAIL" \
+      -c user.name="$COMMIT_NAME" \
+      commit -m "commit release script and config changes"
+  git push https://x-access-token:${GH_PAT}@github.com/shanmukh0504/garden.js.git HEAD:$PR_BRANCH
+fi
