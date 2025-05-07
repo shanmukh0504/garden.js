@@ -228,19 +228,15 @@ done
 
 if [[ "$VERSION_BUMP" == "prerelease" ]]; then
   if [[ "$ROOT_VERSION" =~ -beta\.[0-9]+$ ]]; then
-    BETA_VERSION="$ROOT_VERSION"
+    ROOT_VERSION_BETA="${ROOT_VERSION%-beta.*}"
+    BETA_NUMBER=$(echo "$ROOT_VERSION" | sed -E "s/.*-beta\.([0-9]+)$/\1/")
+    NEW_BETA_NUMBER=$((BETA_NUMBER + 1))
+    NEW_ROOT_VERSION="${ROOT_VERSION_BETA}-beta.${NEW_BETA_NUMBER}"
   else
-    BETA_VERSION="${ROOT_VERSION}-beta.0"
+    ROOT_VERSION_BETA="${ROOT_VERSION}"
+    NEW_ROOT_VERSION="${ROOT_VERSION_BETA}-beta.1"
   fi
 
-  if [[ -n "$BETA_VERSION" && "$BETA_VERSION" != "null" ]]; then
-    BETA_NUMBER=$(echo "$BETA_VERSION" | sed -E "s/.*-beta\.([0-9]+)$/\1/")
-    NEW_BETA_NUMBER=$((BETA_NUMBER + 1))
-    NEW_VERSION="${ROOT_VERSION}-beta.${NEW_BETA_NUMBER}"
-  else
-    echo "No beta version found. Creating the first beta version."
-    NEW_VERSION="${ROOT_VERSION}-beta.1"
-  fi
 else
   NEW_ROOT_VERSION=$(increment_version "$ROOT_VERSION" "$VERSION_BUMP")
 fi
