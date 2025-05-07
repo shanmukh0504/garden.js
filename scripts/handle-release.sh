@@ -252,6 +252,7 @@ fi
 
 if [[ "$IS_PR" == "true" && -n "$PR_BRANCH" ]]; then
   git add .
+  git reset pr.json
   git -c user.email="$COMMIT_EMAIL" \
       -c user.name="$COMMIT_NAME" \
       commit -m "commit release script and config changes"
