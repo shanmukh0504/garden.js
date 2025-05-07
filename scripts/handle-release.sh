@@ -238,7 +238,11 @@ if [[ "$VERSION_BUMP" == "prerelease" ]]; then
   fi
 
 else
-  NEW_ROOT_VERSION=$(increment_version "$ROOT_VERSION" "$VERSION_BUMP")
+  if [[ "$ROOT_VERSION" =~ -beta\.[0-9]+$ ]]; then
+    ROOT_VERSION="${ROOT_VERSION%-beta.*}"
+    NEW_ROOT_VERSION=$(increment_version "$ROOT_VERSION" "$VERSION_BUMP")
+  else
+    NEW_ROOT_VERSION=$(increment_version "$ROOT_VERSION" "$VERSION_BUMP")
 fi
 
 jq --arg new_version "$NEW_ROOT_VERSION" '.version = $new_version' package.json > package.tmp.json && mv package.tmp.json package.json
