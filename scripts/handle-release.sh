@@ -227,18 +227,19 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
 done
 
 if [[ "$VERSION_BUMP" == "prerelease" ]]; then
-  BETA_PATTERN="${ROOT_VERSION}-beta."
+  if [[ "$ROOT_VERSION" =~ -beta\.[0-9]+$ ]]; then
+    BETA_VERSION="$ROOT_VERSION"
+  else
+    BETA_VERSION="${ROOT_VERSION}-beta.0"
+  fi
 
-  LATEST_BETA_VERSION=$(jq -r .version package.json)
-
-  if [[ -n "$LATEST_BETA_VERSION" && "$LATEST_BETA_VERSION" != "null" ]]; then
-    echo "Latest beta version: $LATEST_BETA_VERSION"
-    BETA_NUMBER=$(echo "$LATEST_BETA_VERSION" | sed -E "s/.*-beta\.([0-9]+)$/\1/")
+  if [[ -n "$BETA_VERSION" && "$BETA_VERSION" != "null" ]]; then
+    BETA_NUMBER=$(echo "$BETA_VERSION" | sed -E "s/.*-beta\.([0-9]+)$/\1/")
     NEW_BETA_NUMBER=$((BETA_NUMBER + 1))
-    NEW_ROOT_VERSION="${ROOT_VERSION}-beta.${NEW_BETA_NUMBER}"
+    NEW_VERSION="${ROOT_VERSION}-beta.${NEW_BETA_NUMBER}"
   else
     echo "No beta version found. Creating the first beta version."
-    NEW_ROOT_VERSION="${ROOT_VERSION}-beta.1"
+    NEW_VERSION="${ROOT_VERSION}-beta.1"
   fi
 else
   NEW_ROOT_VERSION=$(increment_version "$ROOT_VERSION" "$VERSION_BUMP")
