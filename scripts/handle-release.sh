@@ -214,18 +214,11 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
 
   echo "Bumping $PACKAGE_NAME to $NEW_VERSION"
   jq --arg new_version "$NEW_VERSION" '.version = $new_version' package.json > package.tmp.json && mv package.tmp.json package.json
+  git add package.json
 
   if [[ "$VERSION_BUMP" == "prerelease" ]]; then
-    git add package.json
-    git -c user.email="$COMMIT_EMAIL" \
-        -c user.name="$COMMIT_NAME" \
-        commit -m "V$NEW_VERSION"
     yarn npm publish --tag beta --access public
   else
-    git add package.json
-    git -c user.email="$COMMIT_EMAIL" \
-        -c user.name="$COMMIT_NAME" \
-        commit -m "V$NEW_VERSION"
     yarn npm publish --access public
   fi
 
@@ -233,8 +226,17 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
 done
 
 NEW_ROOT_VERSION=$(increment_version "$ROOT_VERSION" "$VERSION_BUMP")
-git tag "gardenfi@$NEW_ROOT_VERSION"
-git push https://x-access-token:${GH_PAT}@github.com/shanmukh0504/garden.js.git HEAD:main --tags
+jq --arg new_version "$NEW_ROOT_VERSION" '.version = $new_version' package.json > package.tmp.json && mv package.tmp.json package.json
+
+git add package.json
+  git -c user.email="$COMMIT_EMAIL" \
+      -c user.name="$COMMIT_NAME" \
+      commit -m "V$NEW_ROOT_VERSION"
+
+if [[ "$VERSION_BUMP" != "prerelease" ]]; then
+  git tag "gardenfi@$NEW_ROOT_VERSION"
+  git push https://x-access-token:${GH_PAT}@github.com/shanmukh0504/garden.js.git HEAD:main --tags
+fi
 
 yarn config unset yarnPath
 jq 'del(.packageManager)' package.json > temp.json && mv temp.json package.json
