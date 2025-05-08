@@ -98,7 +98,7 @@ declare -A REVERSE_DEP_MAP
 for PKG in $TOPO_ORDER; do
   PKG_DIR="${PKG_NAME_TO_DIR[$PKG]}"
   if [[ -z "$PKG_DIR" ]]; then
-    echo "⚠ Skipping $PKG: Directory not found in PKG_NAME_TO_DIR"
+    echo "⚠️ Skipping $PKG: Directory not found in PKG_NAME_TO_DIR"
     continue
   fi
 
@@ -185,6 +185,11 @@ ROOT_VERSION=$(jq -r .version package.json)
 yarn install
 yarn workspaces foreach --all --topological --no-private run build
 
+if [[ "$VERSION_BUMP" != "prerelease" ]]; then
+  git tag "v$NEW_ROOT_VERSION"
+  git push https://x-access-token:${GH_PAT}@github.com/shanmukh0504/garden.js.git HEAD:main --tags
+fi
+
 echo "Publishing in order: ${PUBLISH_ORDER[@]}"
 
 for PKG in "${PUBLISH_ORDER[@]}"; do
@@ -201,7 +206,6 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
     LATEST_BETA_VERSION=$(npm view $PACKAGE_NAME versions --json | jq -r '[.[] | select(contains("'"$BETA_PATTERN"'"))] | last')
 
     if [[ -n "$LATEST_BETA_VERSION" && "$LATEST_BETA_VERSION" != "null" ]]; then
-        echo "Latest beta version: $LATEST_BETA_VERSION"
         BETA_NUMBER=$(echo "$LATEST_BETA_VERSION" | sed -E "s/.*-beta\.([0-9]+)$/\1/")
         NEW_BETA_NUMBER=$((BETA_NUMBER + 1))
         NEW_VERSION="${LATEST_STABLE_VERSION}-beta.${NEW_BETA_NUMBER}"
@@ -252,11 +256,6 @@ git add package.json
   git -c user.email="$COMMIT_EMAIL" \
       -c user.name="$COMMIT_NAME" \
       commit -m "V$NEW_ROOT_VERSION"
-
-if [[ "$VERSION_BUMP" != "prerelease" ]]; then
-  git tag "gardenfi@$NEW_ROOT_VERSION"
-  git push https://x-access-token:${GH_PAT}@github.com/shanmukh0504/garden.js.git HEAD:main --tags
-fi
 
 yarn config unset yarnPath
 jq 'del(.packageManager)' package.json > temp.json && mv temp.json package.json
