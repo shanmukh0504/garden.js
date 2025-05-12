@@ -31,23 +31,9 @@ increment_beta_version() {
   fi
 
   echo "Bumping $PACKAGE_NAME to $NEW_VERSION"
+  jq --arg new_version "$NEW_VERSION" '.version = $new_version' package.json > package.tmp.json && mv package.tmp.json package.json
 
   yarn npm publish --tag beta --access public
-}
-
-increment_root_version() {
-  ROOT_VERSION=$(jq -r .version package.json)
-
-  if [[ "$ROOT_VERSION" =~ -beta\.[0-9]+$ ]]; then
-    ROOT_VERSION_BETA="${ROOT_VERSION%-beta.*}"
-    BETA_NUMBER=$(echo "$ROOT_VERSION" | sed -E "s/.*-beta\.([0-9]+)$/\1/")
-    NEW_BETA_NUMBER=$((BETA_NUMBER + 1))
-    NEW_ROOT_VERSION="${ROOT_VERSION_BETA}-beta.${NEW_BETA_NUMBER}"
-  else
-    NEW_ROOT_VERSION="${ROOT_VERSION}-beta.1"
-  fi
-
-  echo "Bumping root version to $NEW_ROOT_VERSION"
 }
 
 for PACKAGE in "${PACKAGE_NAMES[@]}"; do
@@ -67,5 +53,3 @@ for PACKAGE in "${PACKAGE_NAMES[@]}"; do
 
   cd - > /dev/null
 done
-
-increment_root_version
