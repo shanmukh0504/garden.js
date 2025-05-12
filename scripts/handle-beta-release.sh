@@ -71,9 +71,3 @@ for PACKAGE in "${PACKAGE_NAMES[@]}"; do
 done
 
 increment_root_version
-
-git add package.json
-git -c user.email="$COMMIT_EMAIL" \
-    -c user.name="$COMMIT_NAME" \
-    commit -m "commit release script and config changes"
-git push https://x-access-token:${GH_PAT}@github.com/shanmukh0504/garden.js.git HEAD:main

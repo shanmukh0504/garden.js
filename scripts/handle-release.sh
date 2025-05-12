@@ -185,7 +185,6 @@ ROOT_VERSION=$(jq -r .version package.json)
 yarn install
 yarn workspaces foreach --all --topological --no-private run build
 
-
 if [[ "$VERSION_BUMP" == "prerelease" ]]; then
   if [[ "$ROOT_VERSION" =~ -beta\.[0-9]+$ ]]; then
     ROOT_VERSION_BETA="${ROOT_VERSION%-beta.*}"
@@ -204,11 +203,6 @@ else
   else
     NEW_ROOT_VERSION=$(increment_version "$ROOT_VERSION" "$VERSION_BUMP")
   fi
-fi
-
-if [[ "$VERSION_BUMP" != "prerelease" ]]; then
-  git tag "v$NEW_ROOT_VERSION"
-  git push https://x-access-token:${GH_PAT}@github.com/shanmukh0504/garden.js.git HEAD:main --tags
 fi
 
 echo "Publishing in order: ${PUBLISH_ORDER[@]}"
@@ -250,6 +244,11 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
 
   cd - > /dev/null
 done
+
+if [[ "$VERSION_BUMP" != "prerelease" ]]; then
+  git tag "v$NEW_ROOT_VERSION"
+  git push https://x-access-token:${GH_PAT}@github.com/shanmukh0504/garden.js.git HEAD:main --tags
+fi
 
 if [[ "$IS_PR" != "true" ]]; then
   jq --arg new_version "$NEW_ROOT_VERSION" '.version = $new_version' package.json > package.tmp.json && mv package.tmp.json package.json
