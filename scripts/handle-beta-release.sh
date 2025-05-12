@@ -9,6 +9,7 @@ if [[ -z "$1" ]]; then
   exit 1
 fi
 
+git checkout $PR_BRANCH
 PACKAGE_NAMES=($@)
 echo "Packages to release: ${PACKAGE_NAMES[@]}"
 
