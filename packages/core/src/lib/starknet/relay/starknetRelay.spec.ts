@@ -3,7 +3,7 @@ import { StarknetRelay } from './starknetRelay';
 import { Account } from 'starknet';
 import { STARKNET_CONFIG } from '../../constants';
 import { RpcProvider } from 'starknet';
-import { Network } from '@gardenfi/utils';
+import { Network } from '@shanmukh0504/utils';
 
 describe('StarknetRelay', () => {
   const STARKNET_PRIVATE_KEY =

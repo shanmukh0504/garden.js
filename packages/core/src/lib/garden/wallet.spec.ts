@@ -1,5 +1,5 @@
 import { BitcoinProvider, BitcoinWallet } from '@catalogfi/wallets';
-import { Environment } from '@gardenfi/utils';
+import { Environment } from '@shanmukh0504/utils';
 import { describe, it } from 'vitest';
 import { getBitcoinNetwork } from '../utils';
 

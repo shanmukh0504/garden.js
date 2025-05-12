@@ -1,5 +1,5 @@
-import { SupportedAssets } from '@gardenfi/orderbook';
-import { Environment, Network } from '@gardenfi/utils';
+import { SupportedAssets } from '@shanmukh0504/orderbook';
+import { Environment, Network } from '@shanmukh0504/utils';
 
 export type Api = {
   orderbook: string;

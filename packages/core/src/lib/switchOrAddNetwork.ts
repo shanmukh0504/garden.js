@@ -15,7 +15,7 @@ import {
   ArbitrumLocalnet,
   EthereumLocalnet,
   EvmChain,
-} from '@gardenfi/orderbook';
+} from '@shanmukh0504/orderbook';
 import { createWalletClient, custom, http, WalletClient } from 'viem';
 import { AsyncResult, Err, Ok } from '@catalogfi/utils';
 

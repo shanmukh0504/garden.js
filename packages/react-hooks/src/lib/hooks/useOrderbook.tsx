@@ -1,4 +1,4 @@
-import { IGardenJS, OrderWithStatus } from '@gardenfi/core';
+import { IGardenJS, OrderWithStatus } from '@shanmukh0504/core';
 import { useEffect, useState } from 'react';
 
 export const useOrderbook = (garden: IGardenJS | undefined) => {

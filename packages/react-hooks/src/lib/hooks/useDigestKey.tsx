@@ -1,4 +1,4 @@
-import { DigestKey } from '@gardenfi/utils';
+import { DigestKey } from '@shanmukh0504/utils';
 import { DIGEST_KEY, STORE_NAME, VERSION } from '../constants';
 import { useEffect, useState } from 'react';
 import { DB_NAME } from '../constants';
@@ -103,7 +103,7 @@ export const useDigestKey = () => {
           console.error('Error retrieving digest key:', e);
         };
 
-        transaction.oncomplete = () => {};
+        transaction.oncomplete = () => { };
 
         transaction.onerror = (error) => {
           console.error('Error in digestKey transaction:', error);

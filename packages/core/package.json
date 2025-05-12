@@ -1,6 +1,6 @@
 {
-  "name": "@gardenfi/core",
-  "version": "2.1.5",
+  "name": "@shanmukh0504/core",
+  "version": "6.1.6",
   "type": "module",
   "scripts": {
     "build": "vite build",
@@ -27,8 +27,8 @@
   },
   "dependencies": {
     "@catalogfi/wallets": "^0.2.59",
-    "@gardenfi/orderbook": "workspace:*",
-    "@gardenfi/utils": "workspace:*",
+    "@shanmukh0504/orderbook": "workspace:*",
+    "@shanmukh0504/utils": "workspace:*",
     "bignumber.js": "^9.1.2",
     "bitcoinjs-lib": "^6.1.6",
     "starknet": "6.23.1",

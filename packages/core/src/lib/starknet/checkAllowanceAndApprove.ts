@@ -8,7 +8,7 @@ import {
 } from 'starknet';
 import { AsyncResult, Err, Ok, with0x } from '@catalogfi/utils';
 import { TokenABI } from './abi/starknetTokenABI';
-import { sleep } from '@gardenfi/utils';
+import { sleep } from '@shanmukh0504/utils';
 
 export const checkAllowanceAndApprove = async (
   account: AccountInterface,
@@ -72,8 +72,7 @@ export const checkAllowanceAndApprove = async (
     return Ok('Allowance already approved');
   } catch (error) {
     return Err(
-      `Failed to check or approve allowance: ${
-        error instanceof Error ? error.message : String(error)
+      `Failed to check or approve allowance: ${error instanceof Error ? error.message : String(error)
       }`,
     );
   }
@@ -100,8 +99,7 @@ export const checkAllowance = async (
     return Ok(BigInt(allowance?.toString() || '0'));
   } catch (error) {
     return Err(
-      `Failed to check allowance: ${
-        error instanceof Error ? error.message : String(error)
+      `Failed to check allowance: ${error instanceof Error ? error.message : String(error)
       }`,
     );
   }

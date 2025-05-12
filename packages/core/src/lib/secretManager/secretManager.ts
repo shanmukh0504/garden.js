@@ -2,13 +2,12 @@ import { Err, Ok, trim0x } from '@catalogfi/utils';
 import { sha256, WalletClient } from 'viem';
 import ECPairFactory from 'ecpair';
 import * as ecc from 'tiny-secp256k1';
-import { EventBroker, with0x } from '@gardenfi/utils';
+import { EventBroker, with0x } from '@shanmukh0504/utils';
 import { ISecretManager, SecretManagerEvents } from './secretManager.types';
 
 export class SecretManager
   extends EventBroker<SecretManagerEvents>
-  implements ISecretManager
-{
+  implements ISecretManager {
   private digestKey?: string;
   private walletClient?: WalletClient;
 

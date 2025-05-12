@@ -23,7 +23,7 @@ import {
   isMainnet,
   MatchedOrder,
   Orderbook,
-} from '@gardenfi/orderbook';
+} from '@shanmukh0504/orderbook';
 import {
   APIResponse,
   Environment,
@@ -34,7 +34,7 @@ import {
   Url,
   DigestKey,
   Network,
-} from '@gardenfi/utils';
+} from '@shanmukh0504/utils';
 import { IQuote } from '../quote/quote.types';
 import {
   getBitcoinNetwork,
@@ -143,19 +143,19 @@ export class Garden extends EventBroker<GardenEvents> implements IGardenJS {
     const htlc = {
       evm: config.wallets.evm
         ? new EvmRelay(
-            api.evmRelay,
-            config.wallets.evm,
-            Siwe.fromDigestKey(new Url(api.auth), digestKey),
-          )
+          api.evmRelay,
+          config.wallets.evm,
+          Siwe.fromDigestKey(new Url(api.auth), digestKey),
+        )
         : undefined,
       starknet: config.wallets.starknet
         ? new StarknetRelay(
-            api.starknetRelay,
-            config.wallets.starknet,
-            config.environment === Environment.MAINNET
-              ? Network.MAINNET
-              : Network.TESTNET,
-          )
+          api.starknetRelay,
+          config.wallets.starknet,
+          config.environment === Environment.MAINNET
+            ? Network.MAINNET
+            : Network.TESTNET,
+        )
         : undefined,
     };
 
@@ -367,7 +367,7 @@ export class Garden extends EventBroker<GardenEvents> implements IGardenJS {
       } else if (
         orderRes.val &&
         orderRes.val.create_order.create_id.toLowerCase() ===
-          createOrderID.toLowerCase()
+        createOrderID.toLowerCase()
       ) {
         return Ok(orderRes.val);
       }

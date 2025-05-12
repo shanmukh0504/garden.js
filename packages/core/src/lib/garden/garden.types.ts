@@ -4,16 +4,16 @@ import {
   Asset,
   IOrderbook,
   MatchedOrder,
-} from '@gardenfi/orderbook';
+} from '@shanmukh0504/orderbook';
 import { OrderStatus } from '../orderStatus/status';
-import { Environment, EventBroker, IAuth } from '@gardenfi/utils';
+import { Environment, EventBroker, IAuth } from '@shanmukh0504/utils';
 import { ISecretManager } from '../secretManager/secretManager.types';
 import { IQuote } from '../quote/quote.types';
 import { IBlockNumberFetcher } from '../blockNumberFetcher/blockNumber';
 import { IBitcoinWallet } from '@catalogfi/wallets';
 import { IEVMHTLC } from '../evm/htlc.types';
 import { IStarknetHTLC } from '../starknet/starknetHTLC.types';
-import { DigestKey } from '@gardenfi/utils';
+import { DigestKey } from '@shanmukh0504/utils';
 import { AccountInterface } from 'starknet';
 import { WalletClient } from 'viem';
 import { Api } from '../constants';

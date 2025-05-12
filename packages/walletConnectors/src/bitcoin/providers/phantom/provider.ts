@@ -5,7 +5,7 @@ import * as bitcoin from 'bitcoinjs-lib';
 import axios from 'axios';
 import { initEccLib } from 'bitcoinjs-lib';
 import * as ecc from 'tiny-secp256k1';
-import { Network } from '@gardenfi/utils';
+import { Network } from '@shanmukh0504/utils';
 import { WALLET_CONFIG } from './../../constants';
 import {
   BitcoinNetwork,

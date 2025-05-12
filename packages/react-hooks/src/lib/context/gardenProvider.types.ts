@@ -1,8 +1,8 @@
-import { OrderWithStatus } from '@gardenfi/core';
+import { OrderWithStatus } from '@shanmukh0504/core';
 import { AsyncResult, Request, Result } from '@catalogfi/utils';
-import { IGardenJS, QuoteResponse, SwapParams } from '@gardenfi/core';
-import { Asset, IOrderbook, MatchedOrder } from '@gardenfi/orderbook';
-import { GardenConfigWithHTLCs, GardenConfigWithWallets } from '@gardenfi/core';
+import { IGardenJS, QuoteResponse, SwapParams } from '@shanmukh0504/core';
+import { Asset, IOrderbook, MatchedOrder } from '@shanmukh0504/orderbook';
+import { GardenConfigWithHTLCs, GardenConfigWithWallets } from '@shanmukh0504/core';
 
 export type GardenContextType = {
   /**
@@ -40,8 +40,8 @@ export type GardenContextType = {
 export type GardenProviderProps = {
   children: React.ReactNode;
   config:
-    | Omit<GardenConfigWithHTLCs, 'digestKey'>
-    | Omit<GardenConfigWithWallets, 'digestKey'>;
+  | Omit<GardenConfigWithHTLCs, 'digestKey'>
+  | Omit<GardenConfigWithWallets, 'digestKey'>;
 };
 
 export type QuoteParams = {

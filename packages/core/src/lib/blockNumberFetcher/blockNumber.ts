@@ -1,6 +1,6 @@
 import { AsyncResult, Err, Fetcher, Ok } from '@catalogfi/utils';
-import { Chain } from '@gardenfi/orderbook';
-import { Environment, Url } from '@gardenfi/utils';
+import { Chain } from '@shanmukh0504/orderbook';
+import { Environment, Url } from '@shanmukh0504/utils';
 
 type Response = {
   [key in Chain]: number;

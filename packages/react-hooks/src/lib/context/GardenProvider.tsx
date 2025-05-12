@@ -1,7 +1,7 @@
 import React, { createContext, FC, useEffect, useMemo, useState } from 'react';
 import { useOrderbook } from '../hooks/useOrderbook';
-import { Garden, IGardenJS } from '@gardenfi/core';
-import { SwapParams } from '@gardenfi/core';
+import { Garden, IGardenJS } from '@shanmukh0504/core';
+import { SwapParams } from '@shanmukh0504/core';
 import type {
   GardenContextType,
   GardenProviderProps,
@@ -13,7 +13,7 @@ import {
   getBlockchainType,
   isBitcoin,
   MatchedOrder,
-} from '@gardenfi/orderbook';
+} from '@shanmukh0504/orderbook';
 import { constructOrderpair } from '../utils';
 import { useDigestKey } from '../hooks/useDigestKey';
 import { hasAnyValidValue } from '../utils';

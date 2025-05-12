@@ -1,4 +1,4 @@
-import { Network } from '@gardenfi/utils';
+import { Network } from '@shanmukh0504/utils';
 
 type RequestFunction = (
   { method, params }: { method: string; params: any[] },

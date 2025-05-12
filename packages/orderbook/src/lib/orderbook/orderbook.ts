@@ -9,7 +9,7 @@ import {
   PaginationConfig,
   Status,
 } from './orderbook.types';
-import { APIResponse, ApiStatus, IAuth, Url } from '@gardenfi/utils';
+import { APIResponse, ApiStatus, IAuth, Url } from '@shanmukh0504/utils';
 import { ConstructUrl } from '../utils';
 
 /**

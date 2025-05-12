@@ -9,8 +9,8 @@ import {
   Asset,
   CreateOrderRequestWithAdditionalData,
   CreateOrderReqWithStrategyId,
-} from '@gardenfi/orderbook';
-import { APIResponse, Url } from '@gardenfi/utils';
+} from '@shanmukh0504/orderbook';
+import { APIResponse, Url } from '@shanmukh0504/utils';
 import { constructOrderPair } from '../utils';
 
 export class Quote implements IQuote {

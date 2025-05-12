@@ -23,8 +23,8 @@ import {
   BitcoinNetwork,
   BitcoinProvider,
 } from '@catalogfi/wallets';
-import { Orderbook, Chains } from '@gardenfi/orderbook';
-import { GardenJS } from '@gardenfi/core';
+import { Orderbook, Chains } from '@shanmukh0504/orderbook';
+import { GardenJS } from '@shanmukh0504/core';
 import { BrowserProvider } from 'ethers';
 
 const bitcoinProvider = new BitcoinProvider(BitcoinNetwork.Testnet);
@@ -111,7 +111,7 @@ The secret is the message signed by an `IBitcoinWallet` and the signed message i
 ```ts
 //after creating a GardenJS instance
 
-import { Assets } from '@gardenfi/orderbook';
+import { Assets } from '@shanmukh0504/orderbook';
 
 const orderId = await garden.swap(
   Assets.bitcoin_testnet.BTC,

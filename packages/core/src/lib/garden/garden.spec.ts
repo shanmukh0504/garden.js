@@ -1,5 +1,5 @@
 import { Garden } from './garden';
-import { Environment, with0x } from '@gardenfi/utils';
+import { Environment, with0x } from '@shanmukh0504/utils';
 import {
   createWalletClient,
   http,
@@ -15,7 +15,7 @@ import {
   SupportedAssets,
 
   // SupportedAssets,
-} from '@gardenfi/orderbook';
+} from '@shanmukh0504/orderbook';
 import { sleep } from '@catalogfi/utils';
 import {
   arbitrumSepolia,
@@ -24,14 +24,14 @@ import {
   // sepolia
 } from 'viem/chains';
 // import { EvmRelay } from './../evm/relay/evmRelay';
-import { DigestKey } from '@gardenfi/utils';
+import { DigestKey } from '@shanmukh0504/utils';
 import { switchOrAddNetwork } from '../switchOrAddNetwork';
 import { SwapParams } from './garden.types';
 // import { SecretManager } from '../secretManager/secretManager';
 // import { DigestKey } from './digestKey/digestKey';
 // import { BitcoinNetwork, BitcoinProvider } from '@catalogfi/wallets';
 // import { Quote } from './../quote/quote';
-// import { Orderbook } from 'gardenfi/orderbook';
+// import { Orderbook } from 'shanmukh0504/orderbook';
 
 describe.only('checking garden initialisation', async () => {
   const pk = '8fe869193b5010d1ee36e557478b43f2ade908f23cac40f024d4aa1cd1578a61';
@@ -262,7 +262,7 @@ describe('switch network with http transport', () => {
     const matchingAssetEntry = assetEntries.find(
       ([, asset]) =>
         asset.atomicSwapAddress.toLowerCase() ===
-          atomicSwapAddress.toLowerCase() &&
+        atomicSwapAddress.toLowerCase() &&
         asset.chain === chain.toLowerCase(),
     );
 

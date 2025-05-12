@@ -2,7 +2,7 @@ import {
   bitcoinRegtestAsset,
   Chains,
   WBTCArbitrumLocalnetAsset,
-} from '@gardenfi/orderbook';
+} from '@shanmukh0504/orderbook';
 import { Quote } from './quote';
 import { describe, expect, it } from 'vitest';
 

@@ -1,8 +1,8 @@
 import { STARKNET_CONFIG } from './../../constants';
-import { MatchedOrder } from '@gardenfi/orderbook';
+import { MatchedOrder } from '@shanmukh0504/orderbook';
 import { AsyncResult, Err, Ok } from '@catalogfi/utils';
 import { Account, cairo, Contract, num, CallData, RpcProvider } from 'starknet';
-import { hexToU32Array, Network } from '@gardenfi/utils';
+import { hexToU32Array, Network } from '@shanmukh0504/utils';
 import { TokenABI } from '../abi/starknetTokenABI';
 import { IStarknetHTLC } from '../starknetHTLC.types';
 import { checkAllowanceAndApprove } from '../checkAllowanceAndApprove';
