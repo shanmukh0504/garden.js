@@ -31,7 +31,6 @@ increment_beta_version() {
   fi
 
   echo "Bumping $PACKAGE_NAME to $NEW_VERSION"
-  jq --arg new_version "$NEW_VERSION" '.version = $new_version' package.json > package.tmp.json && mv package.tmp.json package.json
 
   yarn npm publish --tag beta --access public
 }
@@ -49,7 +48,6 @@ increment_root_version() {
   fi
 
   echo "Bumping root version to $NEW_ROOT_VERSION"
-  jq --arg new_version "$NEW_ROOT_VERSION" '.version = $new_version' package.json > package.tmp.json && mv package.tmp.json package.json
 }
 
 for PACKAGE in "${PACKAGE_NAMES[@]}"; do
