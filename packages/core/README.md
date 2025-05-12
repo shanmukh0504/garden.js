@@ -1,11 +1,11 @@
-# @shanmukh0504/core
+# @gardenfi/core
 
-The `@shanmukh0504/core` package serves as an abstraction layer over the `@catalogfi/wallets`(contains different kind of bitcoin and evm wallets) and `@shanmukh0504/orderbook` packages. It provides a simple interface to perform atomic swaps.
+The `@gardenfi/core` package serves as an abstraction layer over the `@catalogfi/wallets`(contains different kind of bitcoin and evm wallets) and `@gardenfi/orderbook` packages. It provides a simple interface to perform atomic swaps.
 
 ## Installation
 
 ```
-npm install `@shanmukh0504/core`
+npm install `@gardenfi/core`
 ```
 
 For more information regarding using the library in different environments see [setup](https://github.com/catalogfi/garden.js/tree/main/packages/core#setup).

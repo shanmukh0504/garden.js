@@ -1,5 +1,5 @@
-import { MatchedOrder } from '@shanmukh0504/orderbook';
-import { AsyncResult } from '@shanmukh0504/utils';
+import { MatchedOrder } from '@gardenfi/orderbook';
+import { AsyncResult } from '@gardenfi/utils';
 
 export interface IEVMHTLC {
   /**

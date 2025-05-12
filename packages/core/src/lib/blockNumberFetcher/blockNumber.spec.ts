@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { BlockNumberFetcher } from './blockNumber';
-import { Environment } from 'shanmukh0504/utils';
+import { Environment } from 'gardenfi/utils';
 
 describe('blockNumber', () => {
   it('should fetch all block number', async () => {
     const fetcher = new BlockNumberFetcher(
-      'https://price.garden.finance/',
+      'https://testnet.api.garden.finance/info',
       Environment.TESTNET,
     );
     const res = await fetcher.fetchBlockNumbers();

@@ -1,7 +1,6 @@
 import { AsyncResult } from '@catalogfi/utils';
-import { APIResponse, IAuth, IStore } from '@shanmukh0504/utils';
+import { APIResponse, IAuth, IStore } from '@gardenfi/utils';
 import { Asset, Chain } from '../asset';
-import { IOrderProvider } from '../orders/orders.types';
 
 /**
  * Configuration for creating an order
@@ -87,7 +86,7 @@ export type OrderConfig = {
   };
 };
 
-export interface IOrderbook extends IOrderProvider {
+export interface IOrderbook {
   /**
    * Creates an order
    * @param {CreateOrderConfig} orderConfig - The configuration for the creating the order.
@@ -118,7 +117,7 @@ export interface IOrderbook extends IOrderProvider {
    */
   getMatchedOrders(
     address: string,
-    pending: boolean,
+    status: Status,
     paginationConfig?: PaginationConfig,
   ): AsyncResult<PaginatedData<MatchedOrder>, string>;
 
@@ -173,7 +172,7 @@ export interface IOrderbook extends IOrderProvider {
     cb: (
       orders: PaginatedData<T extends true ? MatchedOrder : CreateOrder>,
     ) => Promise<void>,
-    pending?: boolean,
+    status?: Status,
     paginationConfig?: PaginationConfig,
   ): Promise<() => void>;
 
@@ -217,7 +216,30 @@ export type AdditionalDataWithStrategyId = {
 };
 
 export type CreateOrderReqWithStrategyId = CreateOrderRequest &
-  AdditionalDataWithStrategyId;
+  AdditionalDataWithStrategyId &
+  AffiliateFeeList<AffiliateFee>;
+
+export type AffiliateFee = {
+  fee: number; // fee in bps
+  address: string;
+  chain: string;
+  asset: string;
+};
+
+export type AffiliateFeeWithAmount = AffiliateFee & {
+  amount: string;
+};
+
+export type AffiliateFeeList<T extends AffiliateFee | AffiliateFeeWithAmount> =
+  {
+    affiliate_fees?: T[];
+  };
+
+export type AffiliateFeeOptionalChainAsset = Omit<
+  AffiliateFee,
+  'chain' | 'asset'
+> &
+  Partial<Pick<AffiliateFee, 'chain' | 'asset'>>;
 
 export type CreateOrderRequest = {
   source_chain: string;
@@ -236,7 +258,8 @@ export type CreateOrderRequest = {
 };
 
 export type CreateOrderRequestWithAdditionalData = CreateOrderRequest &
-  AdditionalData;
+  AdditionalData &
+  AffiliateFeeList<AffiliateFeeWithAmount>;
 
 export type CreateOrder = CreateOrderRequestWithAdditionalData & {
   created_at: string;
@@ -292,3 +315,5 @@ export type PaginationConfig = {
   page?: number;
   per_page?: number;
 };
+
+export type Status = 'all' | 'pending' | 'fulfilled';

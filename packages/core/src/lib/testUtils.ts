@@ -1,5 +1,5 @@
 import { exec } from 'child_process';
-import { Asset, Chains, Chain as Network } from '@shanmukh0504/orderbook';
+import { Asset, Chains, Chain as Network } from '@gardenfi/orderbook';
 
 import { Fetcher } from '@catalogfi/utils';
 import { Chain } from 'viem';
@@ -117,14 +117,14 @@ export const createOrderObject = (
     fromChain === Chains.arbitrum_localnet
       ? WBTCArbitrumLocalnetAsset
       : fromChain === Chains.ethereum_localnet
-        ? WBTCEthereumLocalnetAsset
-        : bitcoinRegtestAsset;
+      ? WBTCEthereumLocalnetAsset
+      : bitcoinRegtestAsset;
   const toAsset =
     toChain === Chains.arbitrum_localnet
       ? WBTCArbitrumLocalnetAsset
       : toChain === Chains.ethereum_localnet
-        ? WBTCEthereumLocalnetAsset
-        : bitcoinRegtestAsset;
+      ? WBTCEthereumLocalnetAsset
+      : bitcoinRegtestAsset;
 
   const additionalData = { btcAddress, strategyId };
 

@@ -12,7 +12,7 @@ describe('DigestKey', () => {
     expect(digestKey.val.userId).toBeTypeOf('string');
   });
   it('should not be able to create a digest key', () => {
-    const digestKey = DigestKey.from('0xshanmukh0504');
+    const digestKey = DigestKey.from('0xgardenfi');
     expect(digestKey.error).toBeDefined();
   });
 

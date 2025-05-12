@@ -1,6 +1,6 @@
 import { Garden } from '../garden';
-import { MatchedOrder, SupportedAssets } from '@shanmukh0504/orderbook';
-import { Environment, with0x } from '@shanmukh0504/utils';
+import { MatchedOrder, SupportedAssets } from '@gardenfi/orderbook';
+import { Environment, with0x } from '@gardenfi/utils';
 import { RpcProvider, Account } from 'starknet';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { privateKeyToAccount } from 'viem/accounts';
@@ -11,7 +11,7 @@ import {
   BitcoinWallet,
 } from '@catalogfi/wallets';
 // import axios from 'axios';
-import { Quote } from '@shanmukh0504/core';
+import { Quote } from '@gardenfi/core';
 import { StarknetRelay } from '../../starknet/relay/starknetRelay';
 // import { promisify } from 'util';
 // import { exec } from 'child_process';

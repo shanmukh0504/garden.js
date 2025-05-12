@@ -1,4 +1,4 @@
-import { MatchedOrder } from '@shanmukh0504/orderbook';
+import { MatchedOrder } from '@gardenfi/orderbook';
 import { AsyncResult } from '@catalogfi/utils';
 
 export interface IStarknetHTLC {

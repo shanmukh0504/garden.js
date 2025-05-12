@@ -23,7 +23,7 @@ import {
   BTCWalletProviderContextType,
   BTCWalletProviderProps,
 } from './btcWalletsProvider.types';
-import { Network } from '@shanmukh0504/utils';
+import { Network } from '@gardenfi/utils';
 
 declare global {
   interface Window {

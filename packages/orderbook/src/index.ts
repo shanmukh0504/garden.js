@@ -12,6 +12,8 @@ export {
   NetworkType,
   TimeLocks,
   getTimeLock,
+  NativeTokenAddress,
+  isEvmNativeToken,
 } from './lib/asset';
 export { OrdersProvider } from './lib/orders/ordersProvider';
 export type { IOrderProvider } from './lib/orders/orders.types';
@@ -23,4 +25,6 @@ export {
   EthereumLocalnet,
   bitcoinRegtestAsset,
   SupportedAssets,
+  StarknetLocalnet,
+  STRKStarknetLocalnetAsset,
 } from './lib/constants';

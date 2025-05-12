@@ -1,4 +1,4 @@
-import { Network } from '@shanmukh0504/utils';
+import { Network } from '@gardenfi/utils';
 
 export interface PhantomBitcoinProvider {
   connect: (

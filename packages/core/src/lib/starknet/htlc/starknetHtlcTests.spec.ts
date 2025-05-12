@@ -2,7 +2,7 @@ import { Account, RpcProvider } from 'starknet';
 import { describe, it, expect, beforeAll } from 'vitest';
 import { StarknetHTLC } from './starknetHTLC';
 import { Garden } from '../../garden/garden';
-import { Environment, sleep, with0x } from '@shanmukh0504/utils';
+import { Environment, sleep, with0x } from '@gardenfi/utils';
 import { privateKeyToAccount } from 'viem/accounts';
 import { WalletClient, createWalletClient, http } from 'viem';
 import {
@@ -10,14 +10,14 @@ import {
   EthereumLocalnet,
   getTimeLock,
   SupportedAssets,
-} from '@shanmukh0504/orderbook';
+} from '@gardenfi/orderbook';
 import { trim0x } from '@catalogfi/utils';
 import {
   BitcoinNetwork,
   BitcoinProvider,
   BitcoinWallet,
 } from '@catalogfi/wallets';
-import { BlockNumberFetcher, Quote } from '@shanmukh0504/core';
+import { BlockNumberFetcher, Quote } from '@gardenfi/core';
 import { StarknetRelay } from '../relay/starknetRelay';
 
 describe('starknetHtlcTests', () => {

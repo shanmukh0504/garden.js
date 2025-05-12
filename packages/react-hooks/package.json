@@ -1,6 +1,6 @@
 {
-  "name": "@shanmukh0504/react-hooks",
-  "version": "6.2.4",
+  "name": "@gardenfi/react-hooks",
+  "version": "2.1.5-beta.1",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -27,11 +27,11 @@
   },
   "dependencies": {
     "@catalogfi/wallets": "^0.2.59",
-    "@shanmukh0504/core": "workspace:^",
-    "@shanmukh0504/orderbook": "workspace:^",
-    "@shanmukh0504/utils": "workspace:^",
+    "@gardenfi/core": "workspace:*",
+    "@gardenfi/orderbook": "workspace:*",
+    "@gardenfi/utils": "workspace:*",
     "react": "^18.3.1",
-    "viem": "^2.21.23"
+    "starknet": "6.23.1"
   },
   "devDependencies": {
     "@types/react": "^18",

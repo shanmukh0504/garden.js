@@ -6,7 +6,7 @@ import {
   PaginatedData,
   PaginationConfig,
 } from '../orderbook/orderbook.types';
-import { APIResponse, ApiStatus, Url } from '@shanmukh0504/utils';
+import { APIResponse, ApiStatus, Url } from '@gardenfi/utils';
 import { ConstructUrl } from '../utils';
 
 export class OrdersProvider implements IOrderProvider {

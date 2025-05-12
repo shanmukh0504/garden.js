@@ -2,7 +2,7 @@ import { WALLET_CONFIG } from './../../constants';
 import { Balance, IInjectedBitcoinProvider } from '../../bitcoin.types';
 import { XVerseBitcoinProvider } from './xverse.types';
 import { AsyncResult, Err, executeWithTryCatch, Ok } from '@catalogfi/utils';
-import { Network } from '@shanmukh0504/utils';
+import { Network } from '@gardenfi/utils';
 
 export class XverseProvider implements IInjectedBitcoinProvider {
   #xverseProvider: XVerseBitcoinProvider;
@@ -121,12 +121,12 @@ export class XverseProvider implements IInjectedBitcoinProvider {
   /**
    * not available in XVerse wallet
    */
-  on = () => { };
+  on = () => {};
 
   /**
    * not available in XVerse wallet
    */
-  off = () => { };
+  off = () => {};
 
   disconnect = (): AsyncResult<string, string> => {
     this.address = '';

@@ -1,4 +1,4 @@
-import { Url } from '@shanmukh0504/utils';
+import { Url } from '@gardenfi/utils';
 
 /**
  * Constructs a URL with the given base URL, endpoint and parameters (query params)

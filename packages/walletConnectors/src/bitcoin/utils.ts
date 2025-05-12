@@ -1,6 +1,6 @@
 import { AsyncResult, Err, Fetcher, Ok } from '@catalogfi/utils';
 import { Balance } from './bitcoin.types';
-import { Network } from '@shanmukh0504/utils';
+import { Network } from '@gardenfi/utils';
 
 const BitcoinExplorers = {
   testnet: {
@@ -67,40 +67,3 @@ export const getBalance = async (
     return Err('Error while fetching balance', error);
   }
 };
-
-export const getTransactionHistory = async (
-  address: string,
-  network: Network,
-): AsyncResult<Balance, string> => {
-  const explorers = BitcoinExplorers[network];
-  if (!explorers) return Err('Invalid network');
-
-  const blockstreamUrl =
-    'Blockstream' in explorers
-      ? `${explorers.Blockstream}/api/address/${address}`
-      : null;
-  const mempoolUrl = `${explorers.Mempool}/api/address/${address}`;
-
-  try {
-    const urls = blockstreamUrl ? [blockstreamUrl, mempoolUrl] : [mempoolUrl];
-    const response = await Fetcher.getWithFallback<BalanceResponse>(urls, {
-      retryCount: 3,
-      retryDelay: 1000,
-    });
-
-    const confirmedBalanceSatoshis =
-      response.chain_stats.funded_txo_sum - response.chain_stats.spent_txo_sum;
-    const unconfirmedBalanceSatoshis =
-      response.mempool_stats.funded_txo_sum - response.mempool_stats.spent_txo_sum;
-    const totalBalanceSatoshis =
-      confirmedBalanceSatoshis + unconfirmedBalanceSatoshis;
-
-    return Ok({
-      confirmed: confirmedBalanceSatoshis,
-      unconfirmed: unconfirmedBalanceSatoshis,
-      total: totalBalanceSatoshis,
-    });
-  } catch (error) {
-    return Err('Error while fetching transaction history', error);
-  }
-}

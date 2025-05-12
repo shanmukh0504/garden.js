@@ -1,6 +1,6 @@
 import { Garden } from '../garden';
-import { EthereumLocalnet, SupportedAssets } from '@shanmukh0504/orderbook';
-import { Environment, with0x } from '@shanmukh0504/utils';
+import { EthereumLocalnet, SupportedAssets } from '@gardenfi/orderbook';
+import { Environment, with0x } from '@gardenfi/utils';
 import { RpcProvider, Account } from 'starknet';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { privateKeyToAccount } from 'viem/accounts';
@@ -11,7 +11,7 @@ import {
   BitcoinProvider,
   BitcoinWallet,
 } from '@catalogfi/wallets';
-import { Quote } from '@shanmukh0504/core';
+import { Quote } from '@gardenfi/core';
 import { StarknetRelay } from '../../starknet/relay/starknetRelay';
 // import axios from 'axios';
 // import { promisify } from 'util';

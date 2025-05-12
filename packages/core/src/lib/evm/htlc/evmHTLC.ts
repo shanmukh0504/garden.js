@@ -4,7 +4,7 @@ import {
   EVMHTLCErrors,
   EVMSwapConfig,
 } from './evmHTLC.types';
-import { with0x } from '@shanmukh0504/utils';
+import { with0x } from '@gardenfi/utils';
 import {
   Address,
   encodeAbiParameters,

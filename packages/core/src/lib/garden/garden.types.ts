@@ -1,14 +1,22 @@
 import { AsyncResult } from '@catalogfi/utils';
-import { Asset, IOrderbook, MatchedOrder } from '@shanmukh0504/orderbook';
+import {
+  AffiliateFeeOptionalChainAsset,
+  Asset,
+  IOrderbook,
+  MatchedOrder,
+} from '@gardenfi/orderbook';
 import { OrderStatus } from '../orderStatus/status';
-import { Environment, EventBroker, IAuth } from '@shanmukh0504/utils';
+import { Environment, EventBroker, IAuth } from '@gardenfi/utils';
 import { ISecretManager } from '../secretManager/secretManager.types';
 import { IQuote } from '../quote/quote.types';
 import { IBlockNumberFetcher } from '../blockNumberFetcher/blockNumber';
 import { IBitcoinWallet } from '@catalogfi/wallets';
 import { IEVMHTLC } from '../evm/htlc.types';
-import { DigestKey } from './digestKey/digestKey';
 import { IStarknetHTLC } from '../starknet/starknetHTLC.types';
+import { DigestKey } from '@gardenfi/utils';
+import { AccountInterface } from 'starknet';
+import { WalletClient } from 'viem';
+import { Api } from '../constants';
 
 export type SwapParams = {
   /**
@@ -52,6 +60,10 @@ export type SwapParams = {
      */
     btcAddress?: string;
   };
+  /**
+   * Integrator fee for the order.
+   */
+  affiliateFee?: AffiliateFeeOptionalChainAsset[];
 };
 
 export type OrderWithStatus = MatchedOrder & {
@@ -84,12 +96,6 @@ export interface IGardenJS extends EventBroker<GardenEvents> {
    * @returns {Promise<() => void>} A promise that resolves to a function to cancel the execution.
    */
   execute(): Promise<() => void>;
-
-  /**
-   * The URL of the orderbook.
-   * @readonly
-   */
-  get orderbookUrl(): string;
 
   /**
    * The EVM relay.
@@ -163,19 +169,36 @@ export interface IOrderExecutorCache {
   remove(order: MatchedOrder, action: OrderActions): void;
 }
 
-export type GardenProps = {
-  environment: Environment;
-  digestKey: string;
-  api?: string;
+export type ApiConfig =
+  | Environment
+  | (Partial<Api> & { environment: Environment });
+
+export type GardenCoreConfig = {
+  environment: ApiConfig;
+  digestKey: string | DigestKey;
   secretManager?: ISecretManager;
+  auth?: IAuth;
   orderbook?: IOrderbook;
   quote?: IQuote;
   blockNumberFetcher?: IBlockNumberFetcher;
+};
+
+export type GardenHTLCModules = {
   htlc: {
     evm?: IEVMHTLC;
     starknet?: IStarknetHTLC;
   };
 };
+
+export type GardenWalletModules = {
+  wallets: {
+    evm?: WalletClient;
+    starknet?: AccountInterface;
+  };
+};
+
+export type GardenConfigWithWallets = GardenCoreConfig & GardenWalletModules;
+export type GardenConfigWithHTLCs = GardenCoreConfig & GardenHTLCModules;
 
 /**
  * Actions that can be performed on the order.

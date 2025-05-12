@@ -2,7 +2,7 @@ import { AsyncResult, Err, executeWithTryCatch, Ok } from '@catalogfi/utils';
 import { Connect, IInjectedBitcoinProvider } from '../../bitcoin.types';
 import { XdefiBitcoinProvider } from './xdefi.types';
 import { getBalance } from '../../utils';
-import { Network } from '@shanmukh0504/utils';
+import { Network } from '@gardenfi/utils';
 import { WALLET_CONFIG } from './../../constants';
 
 export class XdefiProvider implements IInjectedBitcoinProvider {

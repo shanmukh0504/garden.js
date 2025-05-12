@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { isExpired, ParseOrderStatus } from './orderStatusParser';
-import { OrdersProvider } from '@shanmukh0504/orderbook';
+import { OrdersProvider } from '@gardenfi/orderbook';
 import { BlockNumberFetcher } from '../blockNumberFetcher/blockNumber';
-import { Environment } from 'shanmukh0504/utils';
+import { Environment } from 'gardenfi/utils';
 
 describe('orderStatus', () => {
   it('test IsExpired', async () => {
