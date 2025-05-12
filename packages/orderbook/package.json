@@ -1,5 +1,6 @@
 {
   "name": "@shanmukh0504/orderbook",
+  "description": "An orderbook library for building decentralized exchanges.",
   "version": "6.1.1",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -43,4 +44,3 @@
   },
   "sideEffects": false
 }
-

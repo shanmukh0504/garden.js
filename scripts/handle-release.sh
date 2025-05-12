@@ -174,6 +174,12 @@ increment_version() {
 }
 export -f increment_version
 
+echo "🔍 Checking for local changes before checkout..."
+git status
+echo ""
+echo "📝 Diff of local changes:"
+git diff
+
 if [[ "$IS_PR" == "true" && -n "$PR_BRANCH" ]]; then
   git checkout $PR_BRANCH
 else
