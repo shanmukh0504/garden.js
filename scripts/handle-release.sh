@@ -230,6 +230,7 @@ for PKG in "${PUBLISH_ORDER[@]}"; do
         echo "No beta version found. Creating the first beta version."
         NEW_VERSION="${LATEST_STABLE_VERSION}-beta.1"
     fi
+    jq --arg new_version "$NEW_VERSION" '.version = $new_version' package.json > package.tmp.json && mv package.tmp.json package.json
   else
     NEW_VERSION=$(increment_version "$LATEST_STABLE_VERSION" "$VERSION_BUMP")
     jq --arg new_version "$NEW_VERSION" '.version = $new_version' package.json > package.tmp.json && mv package.tmp.json package.json
@@ -260,6 +261,9 @@ if [[ "$IS_PR" != "true" ]]; then
         -c user.name="$COMMIT_NAME" \
         commit -m "v$NEW_ROOT_VERSION"
   git push https://x-access-token:${GH_PAT}@github.com/shanmukh0504/garden.js.git HEAD:main
+
+else
+  git stash
 fi
 
 yarn config unset yarnPath
