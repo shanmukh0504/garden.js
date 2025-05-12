@@ -174,6 +174,8 @@ increment_version() {
 }
 export -f increment_version
 
+git stash
+
 if [[ "$IS_PR" == "true" && -n "$PR_BRANCH" ]]; then
   git checkout $PR_BRANCH
 else
