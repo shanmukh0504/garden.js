@@ -1,6 +1,6 @@
 {
   "name": "@shanmukh0504/wallet-connectors",
-  "version": "6.1.0",
+  "version": "6.1.2",
   "type": "module",
   "scripts": {
     "build": "vite build",
@@ -45,4 +45,3 @@
     "tiny-secp256k1": "^2.2.3"
   }
 }
-
