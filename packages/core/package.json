@@ -1,6 +1,6 @@
 {
   "name": "@shanmukh0504/core",
-  "version": "6.1.4",
+  "version": "6.1.6",
   "type": "module",
   "scripts": {
     "build": "vite build",
@@ -27,15 +27,13 @@
   },
   "dependencies": {
     "@catalogfi/wallets": "^0.2.59",
-    "@shanmukh0504/orderbook": "workspace:^",
-    "@shanmukh0504/utils": "workspace:^",
+    "@shanmukh0504/orderbook": "workspace:*",
+    "@shanmukh0504/utils": "workspace:*",
     "bignumber.js": "^9.1.2",
     "bitcoinjs-lib": "^6.1.6",
-    "crypto-browserify": "^3.12.1",
     "starknet": "6.23.1",
     "tiny-secp256k1": "^2.2.3",
-    "varuint-bitcoin": "^1.1.2",
-    "viem": "^2.21.23"
+    "varuint-bitcoin": "^1.1.2"
   },
   "devDependencies": {
     "dotenv": "^16.3.1",

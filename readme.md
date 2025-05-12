@@ -1,4 +1,4 @@
-[![NPM Version](https://img.shields.io/npm/v/%40gardenfi%2Fcore?style=for-the-badge&logo=npm&label=core&color=B1D8B7)](https://www.npmjs.com/package/@gardenfi/core) [![NPM Version](https://img.shields.io/npm/v/%40gardenfi%2Forderbook?style=for-the-badge&logo=npm&label=orderbook&color=B1D8B7)](https://www.npmjs.com/package/@gardenfi/orderbook)
+[![NPM Version](https://img.shields.io/npm/v/%40shanmukh0504%2Fcore?style=for-the-badge&logo=npm&label=core&color=B1D8B7)](https://www.npmjs.com/package/@shanmukh0504/core) [![NPM Version](https://img.shields.io/npm/v/%40shanmukh0504%2Forderbook?style=for-the-badge&logo=npm&label=orderbook&color=B1D8B7)](https://www.npmjs.com/package/@shanmukh0504/orderbook)
 
 # Garden SDK
 
@@ -6,8 +6,8 @@ The Garden SDK is a set of typescript packages that allow you to bridge Bitcoin 
 
 ## Packages
 
-- [@gardenfi/orderbook](./packages/orderbook/README.md): Allows you to create orders and listen to them.
-- [@gardenfi/core](./packages/core/README.md): Allows you to interact with orders once you setup your wallets.
+- [@shanmukh0504/orderbook](./packages/orderbook/README.md): Allows you to create orders and listen to them.
+- [@shanmukh0504/core](./packages/core/README.md): Allows you to interact with orders once you setup your wallets.
 
 ## Docs
 
@@ -22,7 +22,7 @@ This project uses yarn workspaces. Run `yarn` in the directory to install all de
 To build a package, use:
 
 ```bash
-yarn workspace @gardenfi/<package_name> build
+yarn workspace @shanmukh0504/<package_name> build
 ```
 
 To run the development server while building all packages as you develop, use:

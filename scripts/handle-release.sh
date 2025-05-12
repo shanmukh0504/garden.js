@@ -174,12 +174,6 @@ increment_version() {
 }
 export -f increment_version
 
-echo "🔍 Checking for local changes before checkout..."
-git status
-echo ""
-echo "📝 Diff of local changes:"
-git diff
-
 if [[ "$IS_PR" == "true" && -n "$PR_BRANCH" ]]; then
   git checkout $PR_BRANCH
 else
@@ -265,9 +259,6 @@ if [[ "$IS_PR" != "true" ]]; then
         -c user.name="$COMMIT_NAME" \
         commit -m "v$NEW_ROOT_VERSION"
   git push https://x-access-token:${GH_PAT}@github.com/shanmukh0504/garden.js.git HEAD:main
-
-else
-  git stash
 fi
 
 yarn config unset yarnPath

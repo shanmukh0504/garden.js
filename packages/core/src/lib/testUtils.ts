@@ -117,14 +117,14 @@ export const createOrderObject = (
     fromChain === Chains.arbitrum_localnet
       ? WBTCArbitrumLocalnetAsset
       : fromChain === Chains.ethereum_localnet
-        ? WBTCEthereumLocalnetAsset
-        : bitcoinRegtestAsset;
+      ? WBTCEthereumLocalnetAsset
+      : bitcoinRegtestAsset;
   const toAsset =
     toChain === Chains.arbitrum_localnet
       ? WBTCArbitrumLocalnetAsset
       : toChain === Chains.ethereum_localnet
-        ? WBTCEthereumLocalnetAsset
-        : bitcoinRegtestAsset;
+      ? WBTCEthereumLocalnetAsset
+      : bitcoinRegtestAsset;
 
   const additionalData = { btcAddress, strategyId };
 
