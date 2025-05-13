@@ -158,6 +158,7 @@ export class Garden extends EventBroker<GardenEvents> implements IGardenJS {
         )
         : undefined,
     };
+    const ghj = {};
 
     return new Garden({
       htlc,
