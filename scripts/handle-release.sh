@@ -183,7 +183,10 @@ fi
 ROOT_VERSION=$(jq -r .version package.json)
 
 yarn install
-yarn workspaces foreach --all --topological --no-private run build
+if ! yarn workspaces foreach --all --topological --no-private run build; then
+  echo "Build failed. Exiting."
+  exit 1
+fi
 
 if [[ "$VERSION_BUMP" == "prerelease" ]]; then
   if [[ "$ROOT_VERSION" =~ -beta\.[0-9]+$ ]]; then
