@@ -140,6 +140,7 @@ export class Garden extends EventBroker<GardenEvents> implements IGardenJS {
         'API not found, invalid environment ' + config.environment,
       );
 
+      
     const htlc = {
       evm: config.wallets.evm
         ? new EvmRelay(
