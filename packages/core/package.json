@@ -1,6 +1,6 @@
 {
   "name": "@shanmukh0504/core",
-  "version": "6.1.9",
+  "version": "6.1.10",
   "type": "module",
   "scripts": {
     "build": "vite build",
