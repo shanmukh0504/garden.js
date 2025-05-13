@@ -12,6 +12,9 @@ if [[ "$GITHUB_EVENT_NAME" == "issue_comment" ]]; then
   IS_PR=true
 fi
 
+ROOT_VERSION=$(jq -r .version package.json)
+echo "Current root version: $ROOT_VERSION"
+
 if [[ $1 == "beta" ]]; then
   VERSION_BUMP="prerelease"
   PRERELEASE_SUFFIX="beta"
@@ -179,8 +182,6 @@ if [[ "$IS_PR" == "true" && -n "$PR_BRANCH" ]]; then
 else
   git checkout main
 fi
-
-ROOT_VERSION=$(jq -r .version package.json)
 
 yarn install
 if ! yarn workspaces foreach --all --topological --no-private run build; then
