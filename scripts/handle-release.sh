@@ -12,7 +12,7 @@ if [[ "$GITHUB_EVENT_NAME" == "issue_comment" ]]; then
   IS_PR=true
 fi
 
-ROOT_VERSION=$(jq -r .version package.json)
+ROOT_VERSION=$(git tag --list 'v*' --sort=-v:refname | head -n 1 | sed 's/^v//')
 echo "Current root version: $ROOT_VERSION"
 
 if [[ $1 == "beta" ]]; then
