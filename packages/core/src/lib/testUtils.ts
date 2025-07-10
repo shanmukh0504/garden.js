@@ -35,6 +35,10 @@ export const mineBtcBlocks = async (blocks: number, address: string) => {
   return response;
 };
 
+
+
+
+
 // export const mineEvmBlocks = async (
 //   provider: JSOnP,
 //   blocks: number,
